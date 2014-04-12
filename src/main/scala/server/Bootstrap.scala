@@ -24,7 +24,6 @@ import org.jboss.netty.bootstrap.ConnectionlessBootstrap
 import java.net.InetAddress
 import pipeline.UDPDnsPipeline
 import pipeline.TCPDnsPipeline
-import pipeline.HttpPipeline
 import configs.ConfigService
 import messaging.Rabbit
 
@@ -107,8 +106,8 @@ object Bootstrap {
   }
 
   private def startHttp() {
-    httpBootstrap.setPipelineFactory(new HttpPipeline)
-    httpBootstrap.bind(new InetSocketAddress(httpServerAddress, httpServerPort))
+    // httpBootstrap.setPipelineFactory(new HttpPipeline)
+    // httpBootstrap.bind(new InetSocketAddress(httpServerAddress, httpServerPort))
   }
   
   private def stopTCP() {

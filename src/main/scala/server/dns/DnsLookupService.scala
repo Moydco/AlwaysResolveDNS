@@ -74,6 +74,7 @@ object DnsLookupService {
     qtype match {
       // a me sembra un hack terribile per il pattern matching, ma scala lo richiede...
       case q if (q==RecordType.A.id && randomizeARecords == true) => randomRecordA(records)
+      case q if (q==RecordType.ALL.id) => filterDuplicatesA(records)
       case _ => records
     }
   }
@@ -94,6 +95,29 @@ object DnsLookupService {
       val selectedRecord = Random.shuffle(recordsA).head
       // Costruire la risposta!
       List(selectedRecord) ++ others
+    }
+    else
+      List[(String, AbstractRecord)]()
+  }
+
+
+  /** Funzione per filtrare i singoli record A nel caso di query di tipo any
+  */
+  def filterDuplicatesA(records: List[(String, AbstractRecord)]): List[(String, AbstractRecord)] = {
+    if(!records.isEmpty)
+    {
+      logger.debug("Filtraggio dei duplicati dei record A")
+      // Separo i record A dagli altri. Se ce ne sono.
+      val (recordsA, others) = records.partition( tuple => tuple._2.description == "A")
+      // Filtra i duplicati
+      var distinctRecords = List[(String, AbstractRecord)] ()
+      if(!recordsA.isEmpty)
+      {
+        for(record <- recordsA if !distinctRecords.exists(_._2.asInstanceOf[A].address == record._2.asInstanceOf[A].address))
+          distinctRecords = List(record) ++ distinctRecords
+      }
+      // Costruire la risposta!
+      distinctRecords ++ others      
     }
     else
       List[(String, AbstractRecord)]()
