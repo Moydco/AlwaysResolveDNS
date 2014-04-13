@@ -37,6 +37,7 @@ import datastructures.DNSAuthoritativeSection
 import records.SOA
 import models.SoaHost
 import records.A
+import records.AAAA
 
 object DnsResponseBuilder {
 
@@ -161,7 +162,7 @@ object DnsResponseBuilder {
         val nameParts = name.split("""\.""")
         val nameBytes = ((nameParts :+ "").map(_.getBytes)).toList
         // val ttl = if(domain.settings.size == 1) domain.settings.head.ttlToLong else ttlForNamePart(nameParts, domain)
-        new RRData(nameBytes, RecordType.withName(record.description).id, qclass, record.timetolive, record.toByteArray.length, record)
+        //new RRData(nameBytes, RecordType.withName(record.description).id, qclass, record.timetolive, record.toByteArray.length, record)
         val ttl = if(domain.settings.size == 1) domain.settings.head.ttlToLong else ttlForNamePart(nameParts, domain)
         // if(RecordType.withName(record.description).id == 1)
         // new RRData(nameBytes, RecordType.withName(record.description).id, qclass, record.timetolive, record.toByteArray.length, record)
@@ -169,7 +170,10 @@ object DnsResponseBuilder {
         // new RRData(nameBytes, RecordType.withName(record.description).id, qclass, 67, record.toByteArray.length, record)
         record match {
           case r: A => new RRData(nameBytes, RecordType.withName(record.description).id, qclass, r.timetolive, record.toByteArray.length, record)
-
+          case r: AAAA => new RRData(nameBytes, RecordType.withName(record.description).id, qclass, r.timetolive, record.toByteArray.length, record)
+          case r: CNAME => new RRData(nameBytes, RecordType.withName(record.description).id, qclass, r.timetolive, record.toByteArray.length, record)          
+          case r: MX => new RRData(nameBytes, RecordType.withName(record.description).id, qclass, r.timetolive, record.toByteArray.length, record)
+          case r: NS => new RRData(nameBytes, RecordType.withName(record.description).id, qclass, r.timetolive, record.toByteArray.length, record)
           case r: AbstractRecord =>  new RRData(nameBytes, RecordType.withName(r.description).id, qclass, ttl, r.toByteArray.length, r)
 
         }

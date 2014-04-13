@@ -81,15 +81,7 @@ case class ExtendedDomain(
   
   @JsonIgnore
   def getHosts(name: String) =  
-    findHosts(name)
-
-  /**
-  Questo metodo serve a tornare tutti gli host ovviamente, ma quello che non capisco è perchè
-  abbia voluto filtrare per nome anche in caso di query any. Così tutti i record A avrebbero
-  dovuto chiamarsi con il nome della zona?
-  */
-  @JsonIgnore
-  def getHostsAnyQuery(name: String) = hosts   
+    findHosts(name) 
     
   @JsonIgnore
   private def compareHostName(name: String)(host: Host) = 

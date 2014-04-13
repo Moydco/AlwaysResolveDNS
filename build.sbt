@@ -1,6 +1,6 @@
 name := "SCALA-DNS"
 
-version := "1.0"
+version := "1.1"
 
 scalaVersion := "2.10.4"
 
@@ -10,7 +10,7 @@ resolvers += "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshot
 
 //resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
-libraryDependencies += 	"io.netty" % "netty" % "3.6.6.Final"
+libraryDependencies += 	"io.netty" % "netty" % "3.9.0.Final"
 
 //libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.3"
  
@@ -22,7 +22,7 @@ libraryDependencies += "org.scalatest" % "scalatest_2.10" % "1.9.1" % "test"
 
 libraryDependencies += "com.typesafe" % "config" % "1.2.0"
 
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.3"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.1"
 
 libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.10" % "2.3.2"
 

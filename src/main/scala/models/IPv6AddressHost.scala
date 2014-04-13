@@ -19,6 +19,9 @@ import records.AAAA
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import utils.HostnameUtils
+import scala.util.Random
+import configs.ConfigService
+import org.slf4j.LoggerFactory
 
 @JsonIgnoreProperties(Array("typ"))
 case class IPv6AddressHost(
@@ -27,6 +30,9 @@ case class IPv6AddressHost(
   @JsonProperty("value") ips: Array[WeightedIP] = null,
   @JsonProperty("ttl") timetolive: Long  
 ) extends Host("AAAA") {
+  val logger = LoggerFactory.getLogger("app")
+  val randomizeRecords = ConfigService.config.getBoolean("randomizeRecords")
+
   def setName(newname: String) = IPv6AddressHost(cls, newname, ips, timetolive)
   
   override def toAbsoluteNames(domain: ExtendedDomain) = 
@@ -38,7 +44,21 @@ case class IPv6AddressHost(
   }
   
   protected def getRData = 
-    if(ips.size == 1) ips(0).weightIP.map(ip => new AAAA(ipToBytes(ip), timetolive)) 
+    if(ips.size == 1)
+    {
+      logger.debug("Single AAAA")
+      ips(0).weightIP.map(ip => new AAAA(ipToBytes(ip), timetolive))
+    }
+    else if(randomizeRecords == true) 
+    {
+      /**
+      Se c'è un array di weighted ip (SBAGLIATO fare più record con lo stesso nome e weight diverso, basta un record
+      con più values weighted) scegline uno a caso.
+      */
+      logger.debug("Collapsing duplicate weighted AAAAs")
+      val list = ips.map(wip => wip.weightIP.map(ip => new AAAA(ipToBytes(ip), timetolive))).flatten.toList
+      Array[AAAA](Random.shuffle(list).head)
+    }
     else ips.map(wip => wip.weightIP.map(ip => new AAAA(ipToBytes(ip), timetolive))).flatten
     
   private def ipToBytes(ip: String) = {

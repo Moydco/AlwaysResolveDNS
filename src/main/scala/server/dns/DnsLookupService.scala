@@ -31,12 +31,10 @@ import scala.annotation.tailrec
 import models.SoaHost
 import datastructures.DNSAuthoritativeSection
 import scala.util.Random
-import configs.ConfigService
 
 
 object DnsLookupService {
   val logger = LoggerFactory.getLogger("app")
-  val randomizeARecords = ConfigService.config.getBoolean("randomizeARecords")
 
   /** Metodo che raccoglie i record della richiesta corrente
   *
@@ -54,14 +52,16 @@ object DnsLookupService {
     qualche altro tipo di query, visto quanti bug ci sono.
     */
     val records = qtype match {
-      case q if q==RecordType.ALL.id => filterDuplicities(qname.mkString(".") + ".", domain.getHostsAnyQuery(relativeHostName(qname, domain))
+      case q if q==RecordType.ALL.id => filterDuplicities(qname.mkString(".") + ".", domain.getHosts(relativeHostName(qname, domain))
         .filter(h => qtype == RecordType.ALL.id || h.typ == RecordType(qtype).toString || h.typ == RecordType.CNAME.toString)
+        .map{x=>logger.debug("XXXXXX"+x.name); x}
         .map { host =>
           val usedCnames = initUsedCnames(host, qname)
-          resolveHost(domain, host, qtype, usedCnames, List(), domain, followCnames)
+          resolveHost(domain, host, qtype, usedCnames, List(), domain, false)
         }).flatten
       case _ => filterDuplicities(qname.mkString(".") + ".", domain.getHosts(relativeHostName(qname, domain))
         .filter(h => qtype == RecordType.ALL.id || h.typ == RecordType(qtype).toString || h.typ == RecordType.CNAME.toString)
+        //.foreach(logger.debug(_.name))
         .map { host =>
           val usedCnames = initUsedCnames(host, qname)
           resolveHost(domain, host, qtype, usedCnames, List(), domain, followCnames)
@@ -71,12 +71,13 @@ object DnsLookupService {
     // Per il debug, stampa le tuple (string abstractrecord)
     logger.debug("<<<<<<<<<<<<<<<<<<<<<")
     records.foreach(record=>logger.debug(record._2.description))
-    qtype match {
-      // a me sembra un hack terribile per il pattern matching, ma scala lo richiede...
-      case q if (q==RecordType.A.id && randomizeARecords == true) => randomRecordA(records)
-      case q if (q==RecordType.ALL.id) => filterDuplicatesA(records)
-      case _ => records
-    }
+    records
+    // qtype match {
+    //   // a me sembra un hack terribile per il pattern matching, ma scala lo richiede...
+    //   case q if (q==RecordType.A.id && randomizeARecords == true) => randomRecordA(records)
+    //   case q if (q==RecordType.ALL.id) => filterDuplicatesA(records)
+    //   case _ => records
+    // }
   }
 
   /** Sceglie a caso uno dei record A della risposta.
@@ -85,43 +86,43 @@ object DnsLookupService {
   * il weight del record). L'efficenza di questo metodo è tutta da dimostrare, ma confido nel classico
   * "quanto basta perchè vada bene".
   */
-  def randomRecordA(records: List[(String, AbstractRecord)]): List[(String, AbstractRecord)] = {
-    if(!records.isEmpty)
-    {
-      logger.debug("Scelta a caso di un record A")
-      // Separo i record A dagli altri. Se ce ne sono.
-      val (recordsA, others) = records.partition( tuple => tuple._2.description == "A")
-      // Randomizzare tutta la lista di record A. Sperando che faccia crollare le prestazioni.
-      val selectedRecord = Random.shuffle(recordsA).head
-      // Costruire la risposta!
-      List(selectedRecord) ++ others
-    }
-    else
-      List[(String, AbstractRecord)]()
-  }
+  // def randomRecordA(records: List[(String, AbstractRecord)]): List[(String, AbstractRecord)] = {
+  //   if(!records.isEmpty)
+  //   {
+  //     logger.debug("Scelta a caso di un record A")
+  //     // Separo i record A dagli altri. Se ce ne sono.
+  //     val (recordsA, others) = records.partition( tuple => tuple._2.description == "A")
+  //     // Randomizzare tutta la lista di record A. Sperando che faccia crollare le prestazioni.
+  //     val selectedRecord = Random.shuffle(recordsA).head
+  //     // Costruire la risposta!
+  //     List(selectedRecord) ++ others
+  //   }
+  //   else
+  //     List[(String, AbstractRecord)]()
+  // }
 
 
   /** Funzione per filtrare i singoli record A nel caso di query di tipo any
   */
-  def filterDuplicatesA(records: List[(String, AbstractRecord)]): List[(String, AbstractRecord)] = {
-    if(!records.isEmpty)
-    {
-      logger.debug("Filtraggio dei duplicati dei record A")
-      // Separo i record A dagli altri. Se ce ne sono.
-      val (recordsA, others) = records.partition( tuple => tuple._2.description == "A")
-      // Filtra i duplicati
-      var distinctRecords = List[(String, AbstractRecord)] ()
-      if(!recordsA.isEmpty)
-      {
-        for(record <- recordsA if !distinctRecords.exists(_._2.asInstanceOf[A].address == record._2.asInstanceOf[A].address))
-          distinctRecords = List(record) ++ distinctRecords
-      }
-      // Costruire la risposta!
-      distinctRecords ++ others      
-    }
-    else
-      List[(String, AbstractRecord)]()
-  }
+  // def filterDuplicatesA(records: List[(String, AbstractRecord)]): List[(String, AbstractRecord)] = {
+  //   if(!records.isEmpty)
+  //   {
+  //     logger.debug("Filtraggio dei duplicati dei record A")
+  //     // Separo i record A dagli altri. Se ce ne sono.
+  //     val (recordsA, others) = records.partition( tuple => tuple._2.description == "A")
+  //     // Filtra i duplicati
+  //     var distinctRecords = List[(String, AbstractRecord)] ()
+  //     if(!recordsA.isEmpty)
+  //     {
+  //       for(record <- recordsA if !distinctRecords.exists(_._2.asInstanceOf[A].address == record._2.asInstanceOf[A].address))
+  //         distinctRecords = List(record) ++ distinctRecords
+  //     }
+  //     // Costruire la risposta!
+  //     distinctRecords ++ others      
+  //   }
+  //   else
+  //     List[(String, AbstractRecord)]()
+  // }
 
   def hostToRecordsWithDefault(qname: List[String], qtype: Int, qclass: Int): List[(String, AbstractRecord)] = 
     try{
