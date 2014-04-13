@@ -37,11 +37,11 @@ object ScalaDns {
   
   def main(args: Array[String]) = {
 
-  JsonIO.loadData
-	JsonIO.loadUsers()
+ //  JsonIO.loadData
+	// JsonIO.loadUsers()
 
-  //HttpToDns.getZonesNames
-  //HttpToDns.loadZonesInMemory
+  HttpToDns.getZonesNames
+  HttpToDns.loadZonesInMemory
     
 	/*val domain = DNSCache.getDomain(RecordType.NS.id, List("blah", "blah"))
 	logger.debug(domain.nameservers.map(_.hostnames.toList.toString).toList.toString)
