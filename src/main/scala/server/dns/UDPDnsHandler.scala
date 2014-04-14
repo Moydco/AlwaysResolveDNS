@@ -7,6 +7,7 @@ import payload.Message
 import records._
 import io.netty.buffer.Unpooled
 import configs.ConfigService
+import io.netty.channel.DefaultAddressedEnvelope
 
 class UDPDnsHandler extends SimpleChannelInboundHandler[Object] {
 
@@ -16,7 +17,10 @@ class UDPDnsHandler extends SimpleChannelInboundHandler[Object] {
 
   override def channelRead0(ctx: ChannelHandlerContext, e: Object) {
     logger.info("This is UDP.")
-    val sourceIP = ctx.channel().remoteAddress.toString
+    if(ctx == null) logger.debug("ctx null")
+    if(DefaultAddressedEnvelope.recipient()==null) logger.debug("ctxchannel null")
+    if(ctx.channel().remoteAddress() == null) logger.debug("addrss null")
+    val sourceIP = DefaultAddressedEnvelope.recipient().toString
     e match {
       case message: Message => {
         logger.info(message.toString)
@@ -38,5 +42,10 @@ class UDPDnsHandler extends SimpleChannelInboundHandler[Object] {
         logger.error("Unsupported message type")
       }
     }
+  }
+
+  override def exceptionCaught( ctx: ChannelHandlerContext,  cause: Throwable) {
+    logger.debug("Unexpected exception from downstream."+cause)
+    ctx.close()
   }
 }

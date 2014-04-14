@@ -73,7 +73,7 @@ object BootstrapDNS {
     tcpBootstrap.childOption(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
     tcpBootstrap.childOption(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
     // Non sono sicuro che servano tutte quelle chiamate alla fine, al limite fermarsi al primo sync
-    tcpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync().channel().closeFuture().sync()
+    tcpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync()
   }
   
   private def startUDP() {
@@ -87,10 +87,15 @@ object BootstrapDNS {
     udpBootstrap.handler(new UDPDnsServerInitializer())
 
     // queste options secondo me non servono
-    udpBootstrap.option(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
+    //udpBootstrap.option(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
  	  udpBootstrap.option(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
-    
-    udpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync().channel().closeFuture().await()
+    //try{
+      udpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync().channel().closeFuture().sync()
+    // }
+    // finally
+    // {
+    //   udpGroup.shutdownGracefully()
+    // }
   }
   
   private def stopTCP() {

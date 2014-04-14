@@ -6,14 +6,14 @@ import io.netty.handler.codec.string.StringDecoder
 import scalaframes.UDPDnsMessageDecoder
 import org.slf4j.LoggerFactory
 import io.netty.channel.ChannelPipeline
-import io.netty.channel.socket.SocketChannel
+import io.netty.channel.socket.nio.NioDatagramChannel
 import server.dns.UDPDnsHandler
 
-class UDPDnsServerInitializer extends ChannelInitializer[SocketChannel] {
+class UDPDnsServerInitializer extends ChannelInitializer[NioDatagramChannel] {
 
   val logger = LoggerFactory.getLogger("app")
   
-  def initChannel(ch: SocketChannel): Unit = {
+  def initChannel(ch: NioDatagramChannel): Unit = {
     logger.info("Initializing UDP server.........")
     // Create a default pipeline implementation.
     val pipeline = ch.pipeline()
