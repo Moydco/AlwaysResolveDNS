@@ -1,22 +1,6 @@
-/**
- * *****************************************************************************
- * Copyright 2012 silenteh
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ****************************************************************************
- */
 package records
-import org.jboss.netty.buffer.ChannelBuffer
+
+import io.netty.buffer.ByteBuf
 import scala.collection.mutable.ArrayBuffer
 import org.slf4j.LoggerFactory
 import scala.annotation.tailrec
@@ -47,15 +31,15 @@ object TXT {
 
   val logger = LoggerFactory.getLogger("app")
 
-  def apply(buf: ChannelBuffer, recordclass: Int, size: Int) = {
+  def apply(buf: ByteBuf, recordclass: Int, size: Int) = {
     val part = buf.readSlice(size)
     val strings = readPart(part, Array[Array[Byte]]())
     new TXT(strings)
   }
 
   @tailrec
-  private def readPart(buf: ChannelBuffer, strings: Array[Array[Byte]]): Array[Array[Byte]] =
-    if (!buf.readable) strings
+  private def readPart(buf: ByteBuf, strings: Array[Array[Byte]]): Array[Array[Byte]] =
+    if (!buf.isReadable) strings
     else {
       val length = buf.readUnsignedByte
       // throw exception string must be MAX 255

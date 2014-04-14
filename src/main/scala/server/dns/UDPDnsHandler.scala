@@ -1,40 +1,23 @@
-/**
- * *****************************************************************************
- * Copyright 2012 silenteh
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ****************************************************************************
- */
 package server.dns
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.channel.MessageEvent
+
+import io.netty.channel.SimpleChannelInboundHandler
+import io.netty.channel.ChannelHandlerContext
 import org.slf4j.LoggerFactory
 import payload.Message
 import records._
-import org.jboss.netty.buffer.ChannelBuffers
+import io.netty.buffer.Unpooled
 import configs.ConfigService
 
-class UDPDnsHandler extends SimpleChannelUpstreamHandler {
+class UDPDnsHandler extends SimpleChannelInboundHandler[Object] {
 
   val logger = LoggerFactory.getLogger("app")
   val UdpResponseMaxSize = ConfigService.config.getInt("udpResponseMaxSize")
   val truncateUDP = ConfigService.config.getBoolean("truncateUDP")
 
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+  override def channelRead0(ctx: ChannelHandlerContext, e: Object) {
     logger.info("This is UDP.")
-    val sourceIP = e.getRemoteAddress.toString
-    e.getMessage match {
+    val sourceIP = ctx.channel().remoteAddress.toString
+    e match {
       case message: Message => {
         logger.info(message.toString)
         logger.info("Request bytes: " + message.toByteArray.toList.toString)
@@ -49,7 +32,7 @@ class UDPDnsHandler extends SimpleChannelUpstreamHandler {
           logger.debug("Compressed response bytes: " + responses.head.toList.toString)
         }
         
-        responses.foreach(response => e.getChannel.write(ChannelBuffers.copiedBuffer(response), e.getRemoteAddress))
+        responses.foreach(response => ctx.writeAndFlush(Unpooled.copiedBuffer(response), ctx.newPromise))
       }
       case _ => {
         logger.error("Unsupported message type")

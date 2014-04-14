@@ -1,5 +1,6 @@
 package records
-import org.jboss.netty.buffer.ChannelBuffer
+
+import io.netty.buffer.ByteBuf
 import payload.Name
 import org.slf4j.LoggerFactory
 import payload.RRData
@@ -32,7 +33,7 @@ object SRV {
 
   val logger = LoggerFactory.getLogger("app")
 
-  def apply(buf: ChannelBuffer, recordclass: Int, size: Int, offset: Int = 0) = {
+  def apply(buf: ByteBuf, recordclass: Int, size: Int, offset: Int = 0) = {
     val priority = buf.readUnsignedShort
     val weight = buf.readUnsignedShort
     val port = buf.readUnsignedShort

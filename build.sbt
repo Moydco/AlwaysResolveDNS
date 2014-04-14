@@ -10,7 +10,9 @@ resolvers += "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshot
 
 //resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
-libraryDependencies += 	"io.netty" % "netty" % "3.9.0.Final"
+//libraryDependencies += 	"io.netty" % "netty" % "3.9.0.Final"
+
+libraryDependencies += "io.netty" % "netty-all" % "4.0.17.Final"
 
 //libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.3"
  

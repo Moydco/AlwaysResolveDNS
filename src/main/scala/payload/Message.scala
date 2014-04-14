@@ -1,22 +1,6 @@
-/**
- * *****************************************************************************
- * Copyright 2012 silenteh
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ****************************************************************************
- */
 package payload
-import org.jboss.netty.buffer.ChannelBuffer
+
+import io.netty.buffer.ByteBuf
 import enums.RecordType
 import org.slf4j.LoggerFactory
 import scala.reflect.ClassTag
@@ -58,7 +42,7 @@ case class Message(
 object Message {
   val logger = LoggerFactory.getLogger("app")
   
-  def apply(buf: ChannelBuffer, offset: Int = 0) = {
+  def apply(buf: ByteBuf, offset: Int = 0) = {
     val header = Header(buf)
     new Message(
       header,
@@ -69,7 +53,7 @@ object Message {
     )
   }
   
-  def deserialize[T: ClassTag](buf: ChannelBuffer, n: Int, o: Int, fn: (ChannelBuffer, Int, Int) => Array[T]) = 
+  def deserialize[T: ClassTag](buf: ByteBuf, n: Int, o: Int, fn: (ByteBuf, Int, Int) => Array[T]) = 
     try {
       fn(buf, n, o)
     } catch {
@@ -79,9 +63,9 @@ object Message {
       }
     }
   
-  def deserializeQuestions(buf: ChannelBuffer, n: Int, o: Int): Array[Question] =
+  def deserializeQuestions(buf: ByteBuf, n: Int, o: Int): Array[Question] =
     if (n >= 1) Array.tabulate(n) { i => Question(buf, o) } else Array()
 
-  def deserializeRRData(buf: ChannelBuffer, n: Int, o: Int): Array[RRData] = 
+  def deserializeRRData(buf: ByteBuf, n: Int, o: Int): Array[RRData] = 
     if (n >= 1) Array.tabulate(n) { i => RRData(buf, o) }.filter(_.rdata != null) else Array()
 }

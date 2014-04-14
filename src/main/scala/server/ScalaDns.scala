@@ -24,11 +24,10 @@ import enums.RecordType
 import server.dns.DnsLookupService
 import payload._
 import server.dns.DnsResponseBuilder
-import org.jboss.netty.buffer.ChannelBuffers
 import datastructures.DNSAuthoritativeSection
 import configs.ConfigService
 import collection.JavaConversions._
-import client.DNSClient
+//import client.DNSClient
 import httpSync.HttpToDns
 
 object ScalaDns {
@@ -37,11 +36,11 @@ object ScalaDns {
   
   def main(args: Array[String]) = {
 
- //  JsonIO.loadData
-	// JsonIO.loadUsers()
+  JsonIO.loadData
+	JsonIO.loadUsers()
 
-  HttpToDns.getZonesNames
-  HttpToDns.loadZonesInMemory
+  // HttpToDns.getZonesNames
+  // HttpToDns.loadZonesInMemory
     
 	/*val domain = DNSCache.getDomain(RecordType.NS.id, List("blah", "blah"))
 	logger.debug(domain.nameservers.map(_.hostnames.toList.toString).toList.toString)
@@ -55,14 +54,16 @@ object ScalaDns {
       else println(UserCreator(userParts(0), userParts(1)))
     }*/
 	
+
+  // DA RIPRISTINARE ANCHE IL CLIENT!!!
     val questionData = DNSAuthoritativeSection.getDomainNames.map(n => (n.split("""\.""").toList.filterNot(_.isEmpty), RecordType.SOA.id, 1)).toList
     ConfigService.config.getStringList("zoneTransferAllowedIps").foreach {ip =>
       logger.debug("Message is about to be sent")  
-      DNSClient.sendNotify(ip, 53, questionData)(message => Unit)
+      //DNSClient.sendNotify(ip, 53, questionData)(message => Unit)
     }
     
     if(args.isEmpty || args.contains("-start")) {
-	  Bootstrap.start
+	  BootstrapDNS.start
     }
     
     //val domains = DNSCache.getDomains.map {case(key, value) => (key, value.filterNot(_._1 == "mail.livescore"))}

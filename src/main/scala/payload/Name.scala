@@ -1,22 +1,6 @@
-/**
- * *****************************************************************************
- * Copyright 2012 silenteh
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * ****************************************************************************
- */
 package payload
-import org.jboss.netty.buffer.ChannelBuffer
+
+import io.netty.buffer.ByteBuf
 import scala.collection.mutable.ListBuffer
 import scala.collection.immutable.List
 import scala.collection.mutable.ArrayBuffer
@@ -44,7 +28,7 @@ object Name {
 
   // we should rewrite this in a more functional way
   
-  def parse(buf: ChannelBuffer, offset: Int = 0) = {
+  def parse(buf: ByteBuf, offset: Int = 0) = {
     @tailrec
     def loop(namesize: Int, length: Short, jumped: Boolean, list: List[Array[Byte]]): List[Array[Byte]] = {
       if (length <= 0 || buf.readableBytes < 1) {

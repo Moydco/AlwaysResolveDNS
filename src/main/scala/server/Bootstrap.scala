@@ -1,59 +1,43 @@
-/*******************************************************************************
- * Copyright 2012 silenteh
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- ******************************************************************************/
 package server
 
-import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import io.netty.bootstrap.ServerBootstrap
 import java.util.concurrent.Executors
 import java.net.InetSocketAddress
-import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory
-import org.jboss.netty.bootstrap.ConnectionlessBootstrap
+import io.netty.bootstrap.Bootstrap
+import io.netty.channel.socket.nio.NioDatagramChannel
+import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.channel.ChannelOption
+import io.netty.channel.EventLoopGroup
+import io.netty.channel.nio.NioEventLoopGroup
 import java.net.InetAddress
-import pipeline.UDPDnsPipeline
-import pipeline.TCPDnsPipeline
+import initializers.UDPDnsServerInitializer
+import initializers.TCPDnsServerInitializer
 import configs.ConfigService
 import messaging.Rabbit
+import org.slf4j.LoggerFactory
+import scala.Boolean
 
-object Bootstrap {
+object BootstrapDNS {
+  val logger = LoggerFactory.getLogger("app")  
   // Per il messaging
   val messagingThread = new Thread(new Rabbit())
+  
+  // val executorTCPBoss = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
+  // val executorTCPWorker = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
+  // val executorUDP = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
 
-  // get the number of CPU cores
-  val cores = Runtime.getRuntime().availableProcessors() + 1
+  val tcpBossGroup = new NioEventLoopGroup()
+  val tcpWorkerGroup = new NioEventLoopGroup()
+  val udpGroup = new NioEventLoopGroup()
   
-  // Java Executors
-  val executorHttpBoss = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
-  val executorHttpWorker = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
-  val executorTCPBoss = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
-  val executorTCPWorker = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
-  val executorUDP = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
-  
-  // ### Http
-  // bootstraps so they can be closed down gracefully
-  val httpFactory = new NioServerSocketChannelFactory(executorHttpBoss, executorHttpWorker)//new NioServerSocketChannelFactory(executorTCP, executorTCP)
-  val httpBootstrap = new ServerBootstrap(httpFactory)
   
   // ### TCP
   // bootstraps so they can be closed down gracefully
-  val tcpFactory = new NioServerSocketChannelFactory(executorTCPBoss, executorTCPWorker)//new NioServerSocketChannelFactory(executorTCP, executorTCP)
-  val tcpBootstrap = new ServerBootstrap(tcpFactory)
+  //val tcpFactory = new NioServerSocketChannelFactory(executorTCPBoss, executorTCPWorker)//new NioServerSocketChannelFactory(executorTCP, executorTCP)
+  val tcpBootstrap = new ServerBootstrap()
   
   // ### UDP
-  val udpFactory = new NioDatagramChannelFactory(executorUDP)
-  val udpBootstrap = new ConnectionlessBootstrap(udpFactory)
+  val udpBootstrap = new Bootstrap()
   
   val httpServerAddress = ConfigService.config.getString("httpServerAddress")
   val httpServerPort = ConfigService.config.getInt("httpServerPort")
@@ -64,14 +48,13 @@ object Bootstrap {
   def start() {
     startTCP
     startUDP
-    //startHttp
     startRabbit
   } 
   
   def stop() {
     stopTCP
     stopUDP
-    //stopHttp
+    stopRabbit
   }
   
   private def startRabbit() {
@@ -79,15 +62,18 @@ object Bootstrap {
   }
   
   private def startTCP() {
+    tcpBootstrap.group(tcpBossGroup, tcpWorkerGroup)
+    tcpBootstrap.channel(classOf[NioServerSocketChannel])
+    tcpBootstrap.childHandler(new TCPDnsServerInitializer())
     // Bind and start to accept incoming connections.
     // we need to refactor this to set it up via config
-    tcpBootstrap.setOption("localAddress", new InetSocketAddress(dnsServerIp, 53));
-    tcpBootstrap.setOption("tcpNoDelay", true);
-    tcpBootstrap.setOption("receiveBufferSize", 1048576);
-    // Configure the TCP pipeline factory.
-    tcpBootstrap.setPipelineFactory(new TCPDnsPipeline())
-    tcpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53))
-    
+    tcpBootstrap.localAddress(new InetSocketAddress(dnsServerIp, 53))
+
+    // Questa libreria fa cagare al cazzo... https://gist.github.com/fbettag/3876463
+    tcpBootstrap.childOption(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
+    tcpBootstrap.childOption(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
+    // Non sono sicuro che servano tutte quelle chiamate alla fine, al limite fermarsi al primo sync
+    tcpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync().channel().closeFuture().sync()
   }
   
   private def startUDP() {
@@ -96,30 +82,25 @@ object Bootstrap {
     // we need to refactor this to set it up via config
     //bootstrap.bind(new InetSocketAddress(InetAddress.getByName("192.168.1.100"), 8080));
     //udpBootstrap.setOption("localAddress", new InetSocketAddress(InetAddress.getByName(dnsServerIp), 53));
-    udpBootstrap.setOption("tcpNoDelay", true);
- 	udpBootstrap.setOption("receiveBufferSize", 1048576);
-    udpBootstrap.setPipelineFactory(new UDPDnsPipeline())
-    
-    udpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53))
-    
-    
-  }
+    udpBootstrap.group(udpGroup)
+    udpBootstrap.channel(classOf[NioDatagramChannel])
+    udpBootstrap.handler(new UDPDnsServerInitializer())
 
-  private def startHttp() {
-    // httpBootstrap.setPipelineFactory(new HttpPipeline)
-    // httpBootstrap.bind(new InetSocketAddress(httpServerAddress, httpServerPort))
+    // queste options secondo me non servono
+    udpBootstrap.option(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
+ 	  udpBootstrap.option(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
+    
+    udpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync().channel().closeFuture().await()
   }
   
   private def stopTCP() {
-    tcpBootstrap.releaseExternalResources()
+    logger.debug("Chiamato STOP")
+    //tcpBootstrap.releaseExternalResources()
   }
   
   private def stopUDP() {
-    udpBootstrap.releaseExternalResources()
-  }
-  
-  private def stopHttp() {
-    httpBootstrap.releaseExternalResources()
+    logger.debug("Chiamato STOP")
+    //udpBootstrap.releaseExternalResources()
   }
 
   private def stopRabbit() {
