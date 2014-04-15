@@ -90,7 +90,7 @@ object BootstrapDNS {
     //udpBootstrap.option(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
  	  udpBootstrap.option(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
     //try{
-      udpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync().channel().closeFuture().sync()
+      udpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync()
     // }
     // finally
     // {

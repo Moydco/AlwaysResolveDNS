@@ -7,21 +7,25 @@ import payload.Message
 import records._
 import io.netty.buffer.Unpooled
 import configs.ConfigService
+import java.net.SocketAddress
+import java.net.InetAddress
+import java.net.InetSocketAddress
 import io.netty.channel.DefaultAddressedEnvelope
+import io.netty.channel.socket.DatagramPacket
 
-class UDPDnsHandler extends SimpleChannelInboundHandler[Object] {
+class UDPDnsHandler extends SimpleChannelInboundHandler[DefaultAddressedEnvelope[payload.Message, InetSocketAddress]] {
 
   val logger = LoggerFactory.getLogger("app")
   val UdpResponseMaxSize = ConfigService.config.getInt("udpResponseMaxSize")
   val truncateUDP = ConfigService.config.getBoolean("truncateUDP")
 
-  override def channelRead0(ctx: ChannelHandlerContext, e: Object) {
+  override def channelRead0(ctx: ChannelHandlerContext, e: DefaultAddressedEnvelope[payload.Message, InetSocketAddress]) {
     logger.info("This is UDP.")
     if(ctx == null) logger.debug("ctx null")
-    if(DefaultAddressedEnvelope.recipient()==null) logger.debug("ctxchannel null")
-    if(ctx.channel().remoteAddress() == null) logger.debug("addrss null")
-    val sourceIP = DefaultAddressedEnvelope.recipient().toString
-    e match {
+    //if(DefaultAddressedEnvelope.recipient()==null) logger.debug("ctxchannel null")
+    if(ctx.channel().remoteAddress() == null) logger.debug("addrss null"+e.sender.toString)
+    val sourceIP = e.sender.toString
+    e.content match {
       case message: Message => {
         logger.info(message.toString)
         logger.info("Request bytes: " + message.toByteArray.toList.toString)
@@ -35,8 +39,9 @@ class UDPDnsHandler extends SimpleChannelInboundHandler[Object] {
           logger.debug("Compressed response length: " + responses.head.length.toString)
           logger.debug("Compressed response bytes: " + responses.head.toList.toString)
         }
-        
-        responses.foreach(response => ctx.writeAndFlush(Unpooled.copiedBuffer(response), ctx.newPromise))
+        // DA SISTEMARE!!!
+        val address = new InetSocketAddress(e.sender.getAddress.getHostAddress, e.sender.getPort)
+        responses.foreach(response => ctx.writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer(response), address)))
       }
       case _ => {
         logger.error("Unsupported message type")

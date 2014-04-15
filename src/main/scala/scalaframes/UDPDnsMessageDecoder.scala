@@ -2,7 +2,7 @@ package scalaframes
 
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
-import io.netty.handler.codec.ByteToMessageDecoder
+import io.netty.handler.codec.MessageToMessageDecoder
 import payload.Header
 import scala.collection.immutable.BitSet
 import payload.Question
@@ -10,16 +10,20 @@ import payload.Message
 import org.slf4j.LoggerFactory
 import scala.annotation.tailrec
 import java.util.List
+import java.net.SocketAddress
+import java.net.InetSocketAddress
+import io.netty.channel.DefaultAddressedEnvelope
+import io.netty.channel.socket.DatagramPacket
 
-class UDPDnsMessageDecoder extends ByteToMessageDecoder {
+class UDPDnsMessageDecoder extends MessageToMessageDecoder[DatagramPacket] {
 
   val logger = LoggerFactory.getLogger("app")
 
   //@Override
-  override def decode(ctx: ChannelHandlerContext, buf: ByteBuf, out: List[Object]): Unit = {
+  override def decode(ctx: ChannelHandlerContext, buf: DatagramPacket, out: List[Object]): Unit = {
     logger.debug("Reading message delivered by UDP")
     // 12 it is the minimum lenght in bytes of the header
-    if (buf.readableBytes() < 12) null
+    if (buf.content.readableBytes() < 12) null
     else {
       // The length field was not received yet - return null.
       // This method will be invoked again when more packets are
@@ -36,7 +40,9 @@ class UDPDnsMessageDecoder extends ByteToMessageDecoder {
       // Read the length field.
       //val length = buf.readUnsigned
       //println(buf.readableBytes())
-      out.add(payload.Message(buf))
+
+      // Il sender viene passato come terzo parametro al prossimo handler, dove verrà spacchettato
+      out.add(new DefaultAddressedEnvelope[payload.Message, InetSocketAddress](payload.Message(buf.content), buf.sender, buf.sender.asInstanceOf[InetSocketAddress]))
     }
 
   }
