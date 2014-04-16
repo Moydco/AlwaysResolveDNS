@@ -91,7 +91,7 @@ object RRData {
       case 255 => null
       // Unknown
       case _ => {
-        logger.warn("Unknown RR type of " + recordtype + " received")
+        logger.debug("Unknown RR type of " + recordtype + " received")
         null
       }
     }

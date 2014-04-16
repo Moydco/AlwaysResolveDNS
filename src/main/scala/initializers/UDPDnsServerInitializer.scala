@@ -14,15 +14,15 @@ class UDPDnsServerInitializer extends ChannelInitializer[NioDatagramChannel] {
   val logger = LoggerFactory.getLogger("app")
   
   def initChannel(ch: NioDatagramChannel): Unit = {
-    logger.info("Initializing UDP server.........")
+    logger.debug("Initializing UDP server.........")
     // Create a default pipeline implementation.
     val pipeline = ch.pipeline()
 
     // Add the text line codec combination first,
     val frameDecoder = new UDPDnsMessageDecoder
     pipeline.addLast("framer", frameDecoder)
-    pipeline.addLast("decoder", new StringDecoder)
-    pipeline.addLast("encoder", new StringEncoder)
+    //pipeline.addLast("decoder", new StringDecoder)
+    //pipeline.addLast("encoder", new StringEncoder)
     pipeline.addLast("dns_handler",new UDPDnsHandler)
 
     pipeline

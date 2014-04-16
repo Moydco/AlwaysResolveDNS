@@ -15,13 +15,13 @@ class TCPDnsServerInitializer extends ChannelInitializer[SocketChannel] {
   val logger = LoggerFactory.getLogger("app")
 
   def initChannel(ch: SocketChannel): Unit = {
-      logger.info("Initializing TCP.........")
+      logger.debug("Initializing TCP.........")
       val pipeline = ch.pipeline()
 
       val frameDecoder = new TCPDnsMessageDecoder
       pipeline.addLast("framer", frameDecoder)
-      pipeline.addLast("decoder", new StringDecoder)
-      pipeline.addLast("encoder", new StringEncoder)
+      //pipeline.addLast("decoder", new StringDecoder)
+      //pipeline.addLast("encoder", new StringEncoder)
       pipeline.addLast("dns_handler",new TCPDnsHandler)
       pipeline
   }

@@ -31,6 +31,17 @@ import collection.JavaConversions._
 import httpSync.HttpToDns
 
 object ScalaDns {
+  val debugEnabled = ConfigService.config.getBoolean("enabledDebugMessages")
+  if(debugEnabled == false)
+  {
+    val root = LoggerFactory.getLogger("app").asInstanceOf[ch.qos.logback.classic.Logger]
+    root.setLevel(ch.qos.logback.classic.Level.INFO)
+  }
+  else
+  {
+    val root = LoggerFactory.getLogger("app").asInstanceOf[ch.qos.logback.classic.Logger]
+    root.setLevel(ch.qos.logback.classic.Level.DEBUG)
+  }    
   
   val logger = LoggerFactory.getLogger("app")
   

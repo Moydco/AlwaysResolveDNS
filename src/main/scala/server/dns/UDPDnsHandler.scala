@@ -20,15 +20,13 @@ class UDPDnsHandler extends SimpleChannelInboundHandler[DefaultAddressedEnvelope
   val truncateUDP = ConfigService.config.getBoolean("truncateUDP")
 
   override def channelRead0(ctx: ChannelHandlerContext, e: DefaultAddressedEnvelope[payload.Message, InetSocketAddress]) {
-    logger.info("This is UDP.")
-    if(ctx == null) logger.debug("ctx null")
-    //if(DefaultAddressedEnvelope.recipient()==null) logger.debug("ctxchannel null")
-    if(ctx.channel().remoteAddress() == null) logger.debug("addrss null"+e.sender.toString)
+    logger.debug("This is UDP.")
+    
     val sourceIP = e.sender.toString
     e.content match {
       case message: Message => {
-        logger.info(message.toString)
-        logger.info("Request bytes: " + message.toByteArray.toList.toString)
+        logger.debug(message.toString)
+        logger.debug("Request bytes: " + message.toByteArray.toList.toString)
         
         val responses = truncateUDP match {
           case true => DnsResponseBuilderUDP(message, sourceIP, UdpResponseMaxSize)
@@ -36,12 +34,11 @@ class UDPDnsHandler extends SimpleChannelInboundHandler[DefaultAddressedEnvelope
         }
         
         if(responses.length == 1) {
-          logger.debug("Compressed response length: " + responses.head.length.toString)
-          logger.debug("Compressed response bytes: " + responses.head.toList.toString)
+          logger.debug("Compressed response length: {}", responses.head.length.toString)
+          logger.debug("Compressed response bytes: {}", responses.head.toList.toString)
         }
-        // DA SISTEMARE!!!
-        val address = new InetSocketAddress(e.sender.getAddress.getHostAddress, e.sender.getPort)
-        responses.foreach(response => ctx.writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer(response), address)))
+
+        responses.foreach(response => ctx.writeAndFlush(new DatagramPacket(Unpooled.copiedBuffer(response), e.sender)))
       }
       case _ => {
         logger.error("Unsupported message type")
