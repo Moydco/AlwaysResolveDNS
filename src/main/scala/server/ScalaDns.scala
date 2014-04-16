@@ -47,7 +47,7 @@ object ScalaDns {
   
   def main(args: Array[String]) = {
     val loadFromHttp = ConfigService.config.getBoolean("loadFromHttp")
-    if(debugEnabled == false)
+    if(loadFromHttp == false)
     {
       JsonIO.loadData
       JsonIO.loadUsers()
