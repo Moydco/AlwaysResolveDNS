@@ -46,12 +46,17 @@ object ScalaDns {
   val logger = LoggerFactory.getLogger("app")
   
   def main(args: Array[String]) = {
-
-  JsonIO.loadData
-	JsonIO.loadUsers()
-
-  // HttpToDns.getZonesNames
-  // HttpToDns.loadZonesInMemory
+    val loadFromHttp = ConfigService.config.getBoolean("loadFromHttp")
+    if(debugEnabled == false)
+    {
+      JsonIO.loadData
+      JsonIO.loadUsers()
+    }
+    else
+    {
+      HttpToDns.getZonesNames
+      HttpToDns.loadZonesInMemory
+    }
     
 	/*val domain = DNSCache.getDomain(RecordType.NS.id, List("blah", "blah"))
 	logger.debug(domain.nameservers.map(_.hostnames.toList.toString).toList.toString)
