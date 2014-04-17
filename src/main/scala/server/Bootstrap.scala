@@ -5,9 +5,9 @@ import java.util.concurrent.Executors
 import java.net.InetSocketAddress
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.socket.nio.NioDatagramChannel
-import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.channel.epoll.EpollServerSocketChannel
 import io.netty.channel.ChannelOption
-import io.netty.channel.EventLoopGroup
+import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 import java.net.InetAddress
 import initializers.UDPDnsServerInitializer
@@ -26,8 +26,8 @@ object BootstrapDNS {
   // val executorTCPWorker = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
   // val executorUDP = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
 
-  val tcpBossGroup = new NioEventLoopGroup()
-  val tcpWorkerGroup = new NioEventLoopGroup()
+  val tcpBossGroup = new EpollEventLoopGroup()
+  val tcpWorkerGroup = new EpollEventLoopGroup()
   val udpGroup = new NioEventLoopGroup()
   
   
@@ -63,7 +63,7 @@ object BootstrapDNS {
   
   private def startTCP() {
     tcpBootstrap.group(tcpBossGroup, tcpWorkerGroup)
-    tcpBootstrap.channel(classOf[NioServerSocketChannel])
+    tcpBootstrap.channel(classOf[EpollServerSocketChannel])
     tcpBootstrap.childHandler(new TCPDnsServerInitializer())
     // Bind and start to accept incoming connections.
     // we need to refactor this to set it up via config

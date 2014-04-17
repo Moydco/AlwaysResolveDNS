@@ -5,16 +5,15 @@ import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.codec.string.StringDecoder
 import scalaframes.UDPDnsMessageDecoder
 import org.slf4j.LoggerFactory
-import io.netty.channel.ChannelPipeline
-import io.netty.channel.socket.SocketChannel
+import io.netty.channel.epoll.EpollSocketChannel
 import scalaframes.TCPDnsMessageDecoder
 import server.dns.TCPDnsHandler
 
-class TCPDnsServerInitializer extends ChannelInitializer[SocketChannel] {
+class TCPDnsServerInitializer extends ChannelInitializer[EpollSocketChannel] {
 
   val logger = LoggerFactory.getLogger("app")
 
-  def initChannel(ch: SocketChannel): Unit = {
+  def initChannel(ch: EpollSocketChannel): Unit = {
       logger.debug("Initializing TCP.........")
       val pipeline = ch.pipeline()
 
