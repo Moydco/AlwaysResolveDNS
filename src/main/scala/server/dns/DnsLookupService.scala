@@ -54,7 +54,7 @@ object DnsLookupService {
     val records = qtype match {
       case q if q==RecordType.ALL.id => filterDuplicities(qname.mkString(".") + ".", domain.getHosts(relativeHostName(qname, domain))
         .filter(h => qtype == RecordType.ALL.id || h.typ == RecordType(qtype).toString || h.typ == RecordType.CNAME.toString)
-        .map{x=>logger.debug("XXXXXX"+x.name); x}
+        //.map{x=>logger.debug("XXXXXX"+x.name); x}
         .map { host =>
           val usedCnames = initUsedCnames(host, qname)
           resolveHost(domain, host, qtype, usedCnames, List(), domain, false)
@@ -69,8 +69,8 @@ object DnsLookupService {
     }
     
     // Per il debug, stampa le tuple (string abstractrecord)
-    logger.debug("<<<<<<<<<<<<<<<<<<<<<")
-    records.foreach(record=>logger.debug(record._2.description))
+    //logger.debug("<<<<<<<<<<<<<<<<<<<<<")
+    //records.foreach(record=>logger.debug(record._2.description))
     records
     // qtype match {
     //   // a me sembra un hack terribile per il pattern matching, ma scala lo richiede...

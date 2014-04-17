@@ -47,7 +47,7 @@ object DnsResponseBuilder {
     val response = try {
       val responseParts = message.query.map { query =>
         val qname = query.qname.filter(_.length > 0).map(new String(_, "UTF-8").toLowerCase)
-        logger.debug("query qname: "+qname)
+        //logger.debug("query qname: "+qname)
         //val domain = DNSCache.getDomain(query.qtype, qname)
         val domain = DNSAuthoritativeSection.getDomain(query.qtype, qname)
         

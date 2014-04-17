@@ -3,12 +3,11 @@ package scalaframes
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ByteToMessageDecoder
+
 import payload.Header
-import scala.collection.immutable.BitSet
 import payload.Question
 import payload.Message
 import org.slf4j.LoggerFactory
-import scala.annotation.tailrec
 import java.util.List
 
 class TCPDnsMessageDecoder extends ByteToMessageDecoder {

@@ -19,36 +19,36 @@ class TCPDnsClient {
   
   val logger = LoggerFactory.getLogger("app")
 
-  def send(address: String, port: Int, message: Message)(callback: ChannelFuture => Unit) = {
+  //def send(address: String, port: Int, message: Message)(callback: ChannelFuture => Unit) = {
     
   
-  //def send(address: String, port: Int, message: Message)(callback: ChannelFuture => Unit) = {
-    // val tcpGroup = new EpollEventLoopGroup
-    // val bootstrap = new Bootstrap()
-    // bootstrap.group(tcpGroup)
-    // bootstrap.channel(classOf[EpollSocketChannel])
-    // bootstrap.handler(new ClientTCPDnsInitializer)
+  def send(address: String, port: Int, message: Message)(callback: ChannelFuture => Unit) = {
+    val tcpGroup = new EpollEventLoopGroup
+    val bootstrap = new Bootstrap()
+    bootstrap.group(tcpGroup)
+    bootstrap.channel(classOf[EpollSocketChannel])
+    bootstrap.handler(new ClientTCPDnsInitializer)
     
-    // val connectionFuture = bootstrap.connect(new InetSocketAddress(address, port))
-    // connectionFuture.addListener(new ChannelFutureListener() {
-    //   override def operationComplete(cf: ChannelFuture) = {
-    //     val channel = cf.channel()
-    //     val messageBytes = message.toCompressedByteArray(Array(), Map())._1
-    //     val bufferedMessage = Unpooled.copiedBuffer(RRData.shortToBytes(messageBytes.length.toShort) ++ messageBytes)
-    //     val future = channel.writeAndFlush(bufferedMessage, channel.newPromise())
-    //     future.addListener(new ChannelFutureListener() {
-    //       override def operationComplete(cf: ChannelFuture) = {
-    //         callback(cf)
-    //         channel.closeFuture.addListener(new ChannelFutureListener() {
-    //           override def operationComplete(cf: ChannelFuture) = Future {
-    //             channel.close
-    //             tcpGroup.shutdownGracefully()
-    //           }
-    //         })
-    //       }
-    //     })
-    //   }
-    // })
+    val connectionFuture = bootstrap.connect(new InetSocketAddress(address, port))
+    connectionFuture.addListener(new ChannelFutureListener() {
+      override def operationComplete(cf: ChannelFuture) = {
+        val channel = cf.channel()
+        val messageBytes = message.toCompressedByteArray(Array(), Map())._1
+        val bufferedMessage = Unpooled.copiedBuffer(RRData.shortToBytes(messageBytes.length.toShort) ++ messageBytes)
+        val future = channel.writeAndFlush(bufferedMessage, channel.newPromise())
+        future.addListener(new ChannelFutureListener() {
+          override def operationComplete(cf: ChannelFuture) = {
+            callback(cf)
+            channel.closeFuture.addListener(new ChannelFutureListener() {
+              override def operationComplete(cf: ChannelFuture) = Future {
+                channel.close
+                tcpGroup.shutdownGracefully()
+              }
+            })
+          }
+        })
+      }
+    })
 
     // val messageBytes = message.toCompressedByteArray(Array(), Map())._1
     // val bufferedMessage = Unpooled.copiedBuffer(RRData.shortToBytes(messageBytes.length.toShort) ++ messageBytes)

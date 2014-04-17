@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 import scalaframes.TCPDnsMessageDecoder
 import client.ClientTCPDnsHandler
 
-class TCPDnsServerInitializer extends ChannelInitializer[EpollSocketChannel] {
+class ClientTCPDnsInitializer extends ChannelInitializer[EpollSocketChannel] {
 
   val logger = LoggerFactory.getLogger("app")
 

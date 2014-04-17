@@ -3,17 +3,14 @@ package scalaframes
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToMessageDecoder
-import payload.Header
-import scala.collection.immutable.BitSet
-import payload.Question
-import payload.Message
-import org.slf4j.LoggerFactory
-import scala.annotation.tailrec
-import java.util.List
-import java.net.SocketAddress
-import java.net.InetSocketAddress
 import io.netty.channel.DefaultAddressedEnvelope
 import io.netty.channel.socket.DatagramPacket
+
+import payload.Header
+import payload.Message
+import org.slf4j.LoggerFactory
+import java.util.List
+import java.net.InetSocketAddress
 
 class UDPDnsMessageDecoder extends MessageToMessageDecoder[DatagramPacket] {
 
