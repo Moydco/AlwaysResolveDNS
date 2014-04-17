@@ -1,21 +1,20 @@
 package server
 
 import io.netty.bootstrap.ServerBootstrap
-import java.util.concurrent.Executors
-import java.net.InetSocketAddress
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.socket.nio.NioDatagramChannel
 import io.netty.channel.epoll.EpollServerSocketChannel
 import io.netty.channel.ChannelOption
 import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
-import java.net.InetAddress
+
+import java.util.concurrent.Executors
+import java.net.InetSocketAddress
 import initializers.UDPDnsServerInitializer
 import initializers.TCPDnsServerInitializer
 import configs.ConfigService
 import messaging.Rabbit
 import org.slf4j.LoggerFactory
-import scala.Boolean
 
 object BootstrapDNS {
   val logger = LoggerFactory.getLogger("app")  

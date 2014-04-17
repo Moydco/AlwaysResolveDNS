@@ -2,7 +2,7 @@ package utils
 
 import enums.RecordType
 import configs.ConfigService
-//import client.DNSClient
+import client.DNSClient
 import models.ExtendedDomain
 import scala.collection.JavaConversions._
 import org.slf4j.LoggerFactory
@@ -36,8 +36,8 @@ import org.slf4j.LoggerFactory
     ConfigService.config.getStringList("zoneTransferAllowedIps").toList.foreach { e =>
       logger.debug("Notification is about to be sent")
       //DNSClient.sendNotify(e,53,notifyQuestion){future =>
-    //   logger.debug("Notify message sent")
-    // }
+      logger.debug("Notify message sent")
+    //}
     }
 
   }

@@ -2,13 +2,13 @@ package server.dns
 
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelFutureListener
+import io.netty.buffer.Unpooled
+
 import org.slf4j.LoggerFactory
 import payload.Message
 import payload.RRData
 import records._
-import io.netty.buffer.Unpooled
-import io.netty.channel.ChannelFutureListener
-import scala.Array.canBuildFrom
 
 class TCPDnsHandler extends SimpleChannelInboundHandler[Object] {
 

@@ -7,14 +7,14 @@ import io.netty.channel.socket.nio.NioDatagramChannel
 
 import scalaframes.UDPDnsMessageDecoder
 import org.slf4j.LoggerFactory
-import server.dns.UDPDnsHandler
+import client.ClientUDPDnsHandler
 
-class UDPDnsServerInitializer extends ChannelInitializer[NioDatagramChannel] {
+class ClientUDPDnsInitializer extends ChannelInitializer[NioDatagramChannel] {
 
   val logger = LoggerFactory.getLogger("app")
   
   def initChannel(ch: NioDatagramChannel): Unit = {
-    logger.debug("Initializing UDP server.........")
+    logger.debug("Initializing UDP client.........")
     // Create a default pipeline implementation.
     val pipeline = ch.pipeline()
 
@@ -23,7 +23,7 @@ class UDPDnsServerInitializer extends ChannelInitializer[NioDatagramChannel] {
     pipeline.addLast("framer", frameDecoder)
     //pipeline.addLast("decoder", new StringDecoder)
     //pipeline.addLast("encoder", new StringEncoder)
-    pipeline.addLast("dns_handler",new UDPDnsHandler)
+    pipeline.addLast("dns_handler",new ClientUDPDnsHandler)
 
     pipeline
   }

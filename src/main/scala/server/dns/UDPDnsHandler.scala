@@ -2,16 +2,17 @@ package server.dns
 
 import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.DefaultAddressedEnvelope
+import io.netty.channel.socket.DatagramPacket
+import io.netty.buffer.Unpooled
+
 import org.slf4j.LoggerFactory
 import payload.Message
 import records._
-import io.netty.buffer.Unpooled
 import configs.ConfigService
 import java.net.SocketAddress
 import java.net.InetAddress
 import java.net.InetSocketAddress
-import io.netty.channel.DefaultAddressedEnvelope
-import io.netty.channel.socket.DatagramPacket
 
 class UDPDnsHandler extends SimpleChannelInboundHandler[DefaultAddressedEnvelope[payload.Message, InetSocketAddress]] {
 
