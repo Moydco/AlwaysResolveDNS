@@ -55,10 +55,10 @@ object ScalaDns {
     }*/
 	
     val questionData = DNSAuthoritativeSection.getDomainNames.map(n => (n.split("""\.""").toList.filterNot(_.isEmpty), RecordType.SOA.id, 1)).toList
-    ConfigService.config.getStringList("zoneTransferAllowedIps").foreach {ip =>
-      logger.debug("Message is about to be sent")  
-      DNSClient.sendNotify(ip, 53, questionData)(message => Unit)
-    }
+    // ConfigService.config.getStringList("zoneTransferAllowedIps").foreach {ip =>
+    //   // logger.debug("Message is about to be sent")  
+    //   // DNSClient.sendNotify(ip, 53, questionData)(message => Unit)
+    // }
     
     if(args.isEmpty || args.contains("-start")) {
 	  BootstrapDNS.start
