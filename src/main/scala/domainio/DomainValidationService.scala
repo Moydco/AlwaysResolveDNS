@@ -97,17 +97,18 @@ object DomainValidationService {
   }
   
   def checkCnameHost(host: CnameHost, domain: ExtendedDomain) = {
-    val names = domain.cname.map(_.name).toList
-    val name = checkHostName(host, names, true)
-    val cname = checkDomainName(host.hostname)
-    val unique = host.hostnames.toList.forall(hostname => isUnique(hostname, names))
-    val uniqueHostname = 
-      if(domain.cname.filterNot(_.equals(host)).exists(c =>
-        c.name == host.name && 
-        HostnameUtils.absoluteHostName(c.hostname, domain.fullName) == HostnameUtils.absoluteHostName(host.hostname, domain.fullName)
-      )) (2, validationMessages("duplicate").format(host.name))
-      else (0, null)
-    ((name._1 :: cname._1 :: unique._1 :: uniqueHostname._1 :: Nil).max, name._2 :: cname._2 :: unique._2 :: uniqueHostname._2 :: Nil)
+    (0, null)
+    // val names = domain.cname.map(_.name).toList
+    // val name = checkHostName(host, names, true)
+    // val cname = checkDomainName(host.hostname)
+    // val unique = host.hostnames.toList.forall(hostname => isUnique(hostname, names))
+    // val uniqueHostname = 
+    //   if(domain.cname.filterNot(_.equals(host)).exists(c =>
+    //     c.name == host.name && 
+    //     HostnameUtils.absoluteHostName(c.hostname, domain.fullName) == HostnameUtils.absoluteHostName(host.hostname, domain.fullName)
+    //   )) (2, validationMessages("duplicate").format(host.name))
+    //   else (0, null)
+    // ((name._1 :: cname._1 :: unique._1 :: uniqueHostname._1 :: Nil).max, name._2 :: cname._2 :: unique._2 :: uniqueHostname._2 :: Nil)
   }
   
   def checkMXHost(host: MXHost, domain: ExtendedDomain) = {
@@ -274,24 +275,25 @@ object DomainValidationService {
   }
 
   def checkInfiniteLoops(domain: ExtendedDomain) = {
-    val ahn = HostnameUtils.absoluteHostName _
-    val dfn = domain.fullName
+    // val ahn = HostnameUtils.absoluteHostName _
+    // val dfn = domain.fullName
     
-    @tailrec
-    def resolveCname(name: String, checkedCnames: List[String] = List()): (Int, String) = 
-      domain.cname.find(c => ahn(c.name, dfn) == name) match {
-        case None => (0, null)
-        case Some(cname) => 
-          if(checkedCnames.contains(ahn(cname.hostname, dfn))) 
-            (1, validationMessages("infinite").format((ahn(cname.hostname, dfn) :: name :: checkedCnames).reverse.mkString(" -> ")))
-          else resolveCname(ahn(cname.hostname, dfn), name :: checkedCnames)
-      }
+    // @tailrec
+    // def resolveCname(name: String, checkedCnames: List[String] = List()): (Int, String) = 
+    //   domain.cname.find(c => ahn(c.name, dfn) == name) match {
+    //     case None => (0, null)
+    //     case Some(cname) => 
+    //       if(checkedCnames.contains(ahn(cname.hostname, dfn))) 
+    //         (1, validationMessages("infinite").format((ahn(cname.hostname, dfn) :: name :: checkedCnames).reverse.mkString(" -> ")))
+    //       else resolveCname(ahn(cname.hostname, dfn), name :: checkedCnames)
+    //   }
     
-    if(domain.cname == null) (0, Nil)
-    else domain.cname.foldRight((0, List[String]())) { case(cname, (valid, messages)) =>
-      val (curValid, curMessage) = resolveCname(ahn(cname.hostname, dfn), ahn(cname.name, dfn) :: Nil)
-      (scala.math.max(curValid, valid), curMessage :: messages)
-    }
+    // if(domain.cname == null) (0, Nil)
+    // else domain.cname.foldRight((0, List[String]())) { case(cname, (valid, messages)) =>
+    //   val (curValid, curMessage) = resolveCname(ahn(cname.hostname, dfn), ahn(cname.name, dfn) :: Nil)
+    //   (scala.math.max(curValid, valid), curMessage :: messages)
+    // }
+    (0, Nil)
     
   }
   

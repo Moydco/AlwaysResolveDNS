@@ -1,8 +1,8 @@
 name := "SCALA-DNS"
 
-version := "1.1"
+version := "1.11"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.0"
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
@@ -30,7 +30,9 @@ libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.
 
 libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.3.2"
 
-libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.12"
+libraryDependencies += "org.scalaj" % "scalaj-http_2.10" % "0.3.12"
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.1"
 
 libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.2.4"
 

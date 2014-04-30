@@ -3,7 +3,7 @@ package server.dns
 import datastructures.DNSCache
 import models.ExtendedDomain
 import models.Host
-import models.CnameHost
+import models.{CnameHost, WeightedCNAME}
 import enums.RecordType
 import datastructures.DomainNotFoundException
 import scala.annotation.tailrec
@@ -200,7 +200,9 @@ object DnsLookupService {
   ): Array[(String, AbstractRecord)] =
     host match {
       case host: CnameHost =>
+        // Se viene richiesto proprio un record cname. Tipo dig cname www2.example.com. Non risolve il cname
         if(qtype == RecordType.CNAME.id || !followCnames) addRecord(host, oldDomain, Nil, records)
+        // Altrimenti vai a vedere a cosa punta, a meno che non sia già stato visto. In tal caso...
         else if (!usedCnames.contains(absoluteHostName(host.hostname, domain.fullName)))
           try {
             val (qname, newDomain, newHost) =
@@ -219,7 +221,7 @@ object DnsLookupService {
                 val absCname = absoluteHostName(newHost.hostname, newDomain.fullName)
                 val absHostname = absoluteHostName(newHost.name, domain.fullName)
                 //resolveHost(domain, _, qtype, absCname :: usedCnames, (absHostname, newHost.toRData) :: shownCnames, newDomain, followCnames)
-                resolveHost(newDomain, h, qtype, absCname :: usedCnames, (absHostname, newHost.copy(hostname = absCname).toRData) :: shownCnames, domain, followCnames)
+                resolveHost(newDomain, h, qtype, absCname :: usedCnames, (absHostname, newHost.copy(hostnames = Array[WeightedCNAME](new WeightedCNAME(cname = absCname))).toRData) :: shownCnames, domain, followCnames)
               }.flatten
           } catch {
             // Cname points to an external domain, search cache
@@ -227,6 +229,7 @@ object DnsLookupService {
             case ex: DomainNotFoundException =>
               records ++ recordsToFlatArray(shownCnames.reverse) ++ host.toRData.map((absoluteHostName(host.name, oldDomain.fullName), _))
           }
+        // ...siamo in un loop infinito.
         else {
           logger.warn("Infinite loop when resolving a CNAME: " + usedCnames.reverse.mkString(" -> ") + " -> " + host.hostname)
           records

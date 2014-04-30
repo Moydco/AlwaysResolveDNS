@@ -11,7 +11,7 @@ import server.dns.DnsResponseBuilder
 import datastructures.DNSAuthoritativeSection
 import configs.ConfigService
 import collection.JavaConversions._
-import client.DNSClient
+//import client.DNSClient
 import httpSync.HttpToDns
 
 object ScalaDns {

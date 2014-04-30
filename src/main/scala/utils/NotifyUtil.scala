@@ -2,7 +2,7 @@ package utils
 
 import enums.RecordType
 import configs.ConfigService
-import client.DNSClient
+//import client.DNSClient
 import models.ExtendedDomain
 import scala.collection.JavaConversions._
 import org.slf4j.LoggerFactory
