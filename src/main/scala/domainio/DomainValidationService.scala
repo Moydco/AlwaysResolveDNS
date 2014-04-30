@@ -100,7 +100,7 @@ object DomainValidationService {
     val names = domain.cname.map(_.name).toList
     val name = checkHostName(host, names, true)
     val cname = checkDomainName(host.hostname)
-    val unique = isUnique(host.hostname, names)
+    val unique = host.hostnames.toList.forall(hostname => isUnique(hostname, names))
     val uniqueHostname = 
       if(domain.cname.filterNot(_.equals(host)).exists(c =>
         c.name == host.name && 
