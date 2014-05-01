@@ -44,7 +44,7 @@ class QueryCountNotifier extends TimerTask {
 	override def run() {
 		val m = new ObjectMapper()
 		m.registerModule(DefaultScalaModule)
-		val values = for( domain <- queryCountMap.keys) yield (domain, queryCountMap.get(domain))
+		val values = for( domain <- queryCountMap.keys ) yield (domain, queryCountMap.get(domain))
 		val json = m.writeValueAsString(new JsonMessage(SERVER_ID, REGION, values))
 		logger.debug(json)
 		try {
@@ -54,6 +54,9 @@ class QueryCountNotifier extends TimerTask {
 	    } catch {
       		case ex: Exception => logger.warn("Error in query count post.")
 	    }
+
+	    // Resetta il contatore per ogni dominio
+	    for( domain <- queryCountMap.keys ) queryCountMap.put(domain, 1)
 	}
 }
 
