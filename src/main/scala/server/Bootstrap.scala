@@ -9,10 +9,13 @@ import io.netty.channel.epoll.EpollEventLoopGroup
 import io.netty.channel.nio.NioEventLoopGroup
 
 import java.util.concurrent.Executors
+import java.util.Timer
+import java.util.Date
 import java.net.InetSocketAddress
 import initializers.UDPDnsServerInitializer
 import initializers.TCPDnsServerInitializer
 import configs.ConfigService
+import httpSync._
 import messaging.Rabbit
 import org.slf4j.LoggerFactory
 
@@ -20,10 +23,7 @@ object BootstrapDNS {
   val logger = LoggerFactory.getLogger("app")  
   // Per il messaging
   val messagingThread = new Thread(new Rabbit())
-  
-  // val executorTCPBoss = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
-  // val executorTCPWorker = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
-  // val executorUDP = Executors.newCachedThreadPool//Executors.newFixedThreadPool(cores)
+  val timerNotifyQuery = new Timer()
 
   val tcpBossGroup = new EpollEventLoopGroup()
   val tcpWorkerGroup = new EpollEventLoopGroup()
@@ -32,14 +32,10 @@ object BootstrapDNS {
   
   // ### TCP
   // bootstraps so they can be closed down gracefully
-  //val tcpFactory = new NioServerSocketChannelFactory(executorTCPBoss, executorTCPWorker)//new NioServerSocketChannelFactory(executorTCP, executorTCP)
   val tcpBootstrap = new ServerBootstrap()
   
   // ### UDP
   val udpBootstrap = new Bootstrap()
-  
-  val httpServerAddress = ConfigService.config.getString("httpServerAddress")
-  val httpServerPort = ConfigService.config.getInt("httpServerPort")
 
   val dnsServerIp = ConfigService.config.getString("dnsServerIp")
   
@@ -48,16 +44,24 @@ object BootstrapDNS {
     startTCP
     startUDP
     startRabbit
-  } 
+    startTimer
+  }
   
   def stop() {
     stopTCP
     stopUDP
     stopRabbit
+    //stopTimer
   }
   
   private def startRabbit() {
     messagingThread.start()
+  }
+
+  private def startTimer() {
+    val TIMER = ConfigService.config.getLong("queryCountTimer")
+    logger.debug("Timer started")
+    timerNotifyQuery.scheduleAtFixedRate(new QueryCountNotifier(), new Date(), TIMER)
   }
   
   private def startTCP() {

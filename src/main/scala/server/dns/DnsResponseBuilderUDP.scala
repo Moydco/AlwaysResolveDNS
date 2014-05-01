@@ -1,26 +1,34 @@
 package server.dns
 
 import org.slf4j.LoggerFactory
-import payload.Message
+
 import datastructures.DNSCache
-import records.AbstractRecord
+import datastructures.DNSAuthoritativeSection
+import datastructures.DomainNotFoundException
+
 import enums.RecordType
+import enums.ResponseCode
+
+import records.AbstractRecord
 import records.MX
 import records.NS
-import models.ExtendedDomain
-import payload.RRData
-import scala.annotation.tailrec
-import records.CNAME
-import payload.Header
-import enums.ResponseCode
-import datastructures.DomainNotFoundException
-import scala.Array.canBuildFrom
-import scala.annotation.tailrec
-import configs.ConfigService
-import scala.collection.JavaConversions._
-import datastructures.DNSAuthoritativeSection
 import records.SOA
+import records.CNAME
+
+import payload.Header
+import payload.Message
+import payload.RRData
+
+import models.ExtendedDomain
 import models.SoaHost
+
+import scala.annotation.tailrec
+import scala.collection.JavaConversions._
+import scala.Array.canBuildFrom
+
+import configs.ConfigService
+
+import httpSync.QueryCountNotifier
 
 object DnsResponseBuilderUDP {
 
@@ -32,6 +40,8 @@ object DnsResponseBuilderUDP {
         val qname = query.qname.filter(_.length > 0).map(new String(_, "UTF-8").toLowerCase)
         //val domain = DNSCache.getDomain(query.qtype, qname)
         val domain = DNSAuthoritativeSection.getDomain(query.qtype, qname)
+
+        QueryCountNotifier.incrementDomain(domain.fullName)
         
         val records = 
           // Zone file transfer
