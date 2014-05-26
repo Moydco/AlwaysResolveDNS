@@ -3,17 +3,17 @@ package initializers
 import io.netty.channel.ChannelInitializer
 import io.netty.handler.codec.string.StringEncoder
 import io.netty.handler.codec.string.StringDecoder
-import io.netty.channel.socket.nio.NioDatagramChannel
+import io.netty.channel.epoll.EpollDatagramChannel
 
 import scalaframes.UDPDnsMessageDecoder
 import org.slf4j.LoggerFactory
 import server.dns.UDPDnsHandler
 
-class UDPDnsServerInitializer extends ChannelInitializer[NioDatagramChannel] {
+class UDPDnsServerInitializer extends ChannelInitializer[EpollDatagramChannel] {
 
   val logger = LoggerFactory.getLogger("app")
   
-  def initChannel(ch: NioDatagramChannel): Unit = {
+  def initChannel(ch: EpollDatagramChannel): Unit = {
     logger.debug("Initializing UDP server.........")
     // Create a default pipeline implementation.
     val pipeline = ch.pipeline()

@@ -2,11 +2,11 @@ package server
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.bootstrap.Bootstrap
-import io.netty.channel.socket.nio.NioDatagramChannel
+import io.netty.channel.epoll.EpollDatagramChannel
 import io.netty.channel.epoll.EpollServerSocketChannel
-import io.netty.channel.ChannelOption
+import io.netty.channel.epoll.EpollChannelOption
 import io.netty.channel.epoll.EpollEventLoopGroup
-import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.ChannelOption
 
 import java.util.concurrent.Executors
 import java.util.Timer
@@ -27,7 +27,7 @@ object BootstrapDNS {
 
   val tcpBossGroup = new EpollEventLoopGroup()
   val tcpWorkerGroup = new EpollEventLoopGroup()
-  val udpGroup = new NioEventLoopGroup()
+  //val udpGroup = new NioEventLoopGroup()
   
   
   // ### TCP
@@ -73,6 +73,8 @@ object BootstrapDNS {
     tcpBootstrap.localAddress(new InetSocketAddress(dnsServerIp, 53))
 
     // Questa libreria fa cagare al cazzo... https://gist.github.com/fbettag/3876463
+    // https://github.com/kxbmap/netty4-example-scala/blob/master/src/main/scala/com/github/kxbmap/netty/example/echo/EchoServer.scala
+    tcpBootstrap.option(EpollChannelOption.SO_REUSEPORT, Boolean.box(true))
     tcpBootstrap.childOption(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
     tcpBootstrap.childOption(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
     // Non sono sicuro che servano tutte quelle chiamate alla fine, al limite fermarsi al primo sync
@@ -85,13 +87,15 @@ object BootstrapDNS {
     // we need to refactor this to set it up via config
     //bootstrap.bind(new InetSocketAddress(InetAddress.getByName("192.168.1.100"), 8080));
     //udpBootstrap.setOption("localAddress", new InetSocketAddress(InetAddress.getByName(dnsServerIp), 53));
-    udpBootstrap.group(udpGroup)
-    udpBootstrap.channel(classOf[NioDatagramChannel])
+    //udpBootstrap.group(udpGroup)
+    udpBootstrap.group(tcpBossGroup)
+    udpBootstrap.channel(classOf[EpollDatagramChannel])
     udpBootstrap.handler(new UDPDnsServerInitializer())
 
     // queste options secondo me non servono
-    //udpBootstrap.option(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
+    //udpBootstrap.option(EpollChannelOption.TCP_NODELAY.asInstanceOf[EpollChannelOption[Any]], true)
  	  udpBootstrap.option(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
+    udpBootstrap.option(EpollChannelOption.SO_REUSEPORT, Boolean.box(true))
     //try{
       udpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync()
     // }
