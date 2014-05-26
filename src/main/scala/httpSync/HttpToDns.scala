@@ -25,12 +25,13 @@ object HttpToDns {
 	val API_KEY = ConfigService.config.getString("apiKey")
 	val API_SECRET = ConfigService.config.getString("apiSecret")
 	val REGION = ConfigService.config.getString("region")
+	val HTTP_TIMEOUT = ConfigService.config.getInt("httpTimeout")
 
 	def getZonesNames = {
 		var temp = ""
 		try { 
 		  temp = Http(HTTP_REQUEST_LIST).param("api_key", API_KEY).param("api_secret", API_SECRET)
-			.option(HttpOptions.connTimeout(5000)).option(HttpOptions.readTimeout(5000)).asString
+			.option(HttpOptions.connTimeout(HTTP_TIMEOUT)).option(HttpOptions.readTimeout(HTTP_TIMEOUT)).asString
 		} catch {
 		  case e: Exception => {logger.error("Unable to retrieve zones list"); System.exit(1);}
 		}
@@ -68,7 +69,7 @@ object HttpToDns {
     try {
     	val temp = Http(HTTP_REQUEST_ZONE).param("zone", zonename).param("region", REGION)
     		.param("api_key", API_KEY).param("api_secret", API_SECRET)
-			.option(HttpOptions.connTimeout(5000)).option(HttpOptions.readTimeout(5000)).asString
+			.option(HttpOptions.connTimeout(HTTP_TIMEOUT)).option(HttpOptions.readTimeout(HTTP_TIMEOUT)).asString
 		logger.debug(temp)
 		val item = Json.readValue(temp, typ)
 		fn(item)

@@ -40,6 +40,7 @@ class QueryCountNotifier extends TimerTask {
 	val SERVER_ID = ConfigService.config.getString("serverID")
 	val REGION = ConfigService.config.getString("region")
 	val HTTP_SEND_QUERY_COUNT = ConfigService.config.getString("httpSendQueryCount")
+	val HTTP_TIMEOUT = ConfigService.config.getInt("httpTimeout")
 
 	override def run() {
 		val m = new ObjectMapper()
@@ -49,7 +50,7 @@ class QueryCountNotifier extends TimerTask {
 		logger.debug(json)
 		try {
 	    	val temp = Http.postData(HTTP_SEND_QUERY_COUNT, json).header("content-type", "application/json")
-				.option(HttpOptions.connTimeout(5000))
+				.option(HttpOptions.connTimeout(HTTP_TIMEOUT))
 			//logger.debug(temp.toString)
 	    } catch {
       		case ex: Exception => logger.warn("Error in query count post.")

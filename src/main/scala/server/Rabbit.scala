@@ -23,6 +23,7 @@ class Rabbit extends Runnable {
 
   val EXCHANGE_NAME = ConfigService.config.getString("exchangeName")
   val HOST = ConfigService.config.getString("rabbitmqHost")
+  val LOAD_FROM_HTTP = ConfigService.config.getBoolean("httpEnabled")
 
   def run() {
     try {
@@ -80,8 +81,15 @@ class Rabbit extends Runnable {
   }
 
   def updateZone(zone: String) = {
-    DNSAuthoritativeSection.removeDomain(zone.split("""\.""").toList)
-    HttpToDns.loadSingleZone(zone)
+    if(LOAD_FROM_HTTP == true) {
+      DNSAuthoritativeSection.removeDomain(zone.split("""\.""").toList)
+      HttpToDns.loadSingleZone(zone)
+    }
+    else {
+      val map = mutable.Map.empty[String, String]
+      map("data")=zone
+      domainUpdate(map)
+    }
   }
 
   def deleteZone(zone: String) = {

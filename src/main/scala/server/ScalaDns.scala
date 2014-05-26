@@ -30,8 +30,8 @@ object ScalaDns {
   val logger = LoggerFactory.getLogger("app")
   
   def main(args: Array[String]) = {
-    val loadFromHttp = ConfigService.config.getBoolean("loadFromHttp")
-    if(loadFromHttp == false)
+    val loadFromDisk = ConfigService.config.getBoolean("loadFromDisk")
+    if(loadFromDisk == true)
     {
       JsonIO.loadData
       JsonIO.loadUsers()
