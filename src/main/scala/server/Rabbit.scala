@@ -23,7 +23,7 @@ class Rabbit extends Runnable {
 
   val EXCHANGE_NAME = ConfigService.config.getString("exchangeName")
   val HOST = ConfigService.config.getString("rabbitmqHost")
-  val LOAD_FROM_HTTP = ConfigService.config.getBoolean("httpEnabled")
+  val LOAD_FROM_HTTP = ConfigService.config.getBoolean("httpRetrievalEnabled")
 
   def run() {
     try {

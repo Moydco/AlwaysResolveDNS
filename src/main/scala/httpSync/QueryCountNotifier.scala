@@ -40,7 +40,7 @@ class QueryCountNotifier extends TimerTask {
 	val SERVER_ID = ConfigService.config.getString("serverID")
 	val REGION = ConfigService.config.getString("region")
 	val HTTP_SEND_QUERY_COUNT = ConfigService.config.getString("httpSendQueryCount")
-	val HTTP_TIMEOUT = ConfigService.config.getInt("httpTimeout")
+	val HTTP_TIMEOUT = ConfigService.config.getInt("httpTimeoutForQuerySend")
 
 	override def run() {
 		val m = new ObjectMapper()

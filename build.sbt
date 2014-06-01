@@ -2,7 +2,7 @@ name := "SCALA-DNS"
 
 version := "1.12"
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.11.1"
 
 resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
 
@@ -22,15 +22,15 @@ libraryDependencies += "com.typesafe" % "config" % "1.2.0"
 
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"
 
-libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.10" % "2.3.2"
+libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.10" % "2.3.3"
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.3.2"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.3.3"
 
-libraryDependencies += "org.scalaj" % "scalaj-http_2.10" % "0.3.12"
+libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.15"
 
 libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.1"
 
-libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.2.4"
+libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.3.1"
 
 seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
 

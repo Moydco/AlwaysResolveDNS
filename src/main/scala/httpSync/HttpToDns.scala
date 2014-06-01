@@ -25,7 +25,7 @@ object HttpToDns {
 	val API_KEY = ConfigService.config.getString("apiKey")
 	val API_SECRET = ConfigService.config.getString("apiSecret")
 	val REGION = ConfigService.config.getString("region")
-	val HTTP_TIMEOUT = ConfigService.config.getInt("httpTimeout")
+	val HTTP_TIMEOUT = ConfigService.config.getInt("httpTimeoutForZoneUpdate")
 
 	def getZonesNames = {
 		var temp = ""
