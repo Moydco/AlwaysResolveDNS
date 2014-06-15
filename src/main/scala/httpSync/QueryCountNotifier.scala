@@ -49,8 +49,11 @@ class QueryCountNotifier extends TimerTask {
 		val json = m.writeValueAsString(new JsonMessage(SERVER_ID, REGION, values))
 		logger.debug(json)
 		try {
-	    	val temp = Http.postData(HTTP_SEND_QUERY_COUNT, json).header("content-type", "application/json")
-				.option(HttpOptions.connTimeout(HTTP_TIMEOUT))
+	   	//  	val temp = Http.postData(HTTP_SEND_QUERY_COUNT, json).header("content-type", "application/json")
+				// .option(HttpOptions.connTimeout(HTTP_TIMEOUT))
+
+	    	val temp = Http.post(HTTP_SEND_QUERY_COUNT).params("json" -> json)
+				.option(HttpOptions.connTimeout(HTTP_TIMEOUT))			
 			//logger.debug(temp.toString)
 	    } catch {
       		case ex: Exception => logger.warn("Error in query count post.")

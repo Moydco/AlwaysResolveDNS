@@ -38,6 +38,7 @@ object BootstrapDNS {
   val udpBootstrap = new Bootstrap()
 
   val dnsServerIp = ConfigService.config.getString("dnsServerIp")
+  val enableReusePort = ConfigService.config.getBoolean("enableReusePort")
   
   // Starts both services
   def start() {
@@ -74,7 +75,9 @@ object BootstrapDNS {
 
     // Questa libreria fa cagare al cazzo... https://gist.github.com/fbettag/3876463
     // https://github.com/kxbmap/netty4-example-scala/blob/master/src/main/scala/com/github/kxbmap/netty/example/echo/EchoServer.scala
-    tcpBootstrap.option(EpollChannelOption.SO_REUSEPORT, Boolean.box(true))
+    if(enableReusePort == true)
+      tcpBootstrap.option(EpollChannelOption.SO_REUSEPORT, Boolean.box(true))
+
     tcpBootstrap.childOption(ChannelOption.TCP_NODELAY.asInstanceOf[ChannelOption[Any]], true)
     tcpBootstrap.childOption(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
     // Non sono sicuro che servano tutte quelle chiamate alla fine, al limite fermarsi al primo sync
@@ -82,7 +85,7 @@ object BootstrapDNS {
   }
   
   private def startUDP() {
-    
+
     // bind the server to an address and port
     // we need to refactor this to set it up via config
     //bootstrap.bind(new InetSocketAddress(InetAddress.getByName("192.168.1.100"), 8080));
@@ -94,8 +97,11 @@ object BootstrapDNS {
 
     // queste options secondo me non servono
     //udpBootstrap.option(EpollChannelOption.TCP_NODELAY.asInstanceOf[EpollChannelOption[Any]], true)
- 	  udpBootstrap.option(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
-    udpBootstrap.option(EpollChannelOption.SO_REUSEPORT, Boolean.box(true))
+    udpBootstrap.option(ChannelOption.SO_RCVBUF.asInstanceOf[ChannelOption[Any]], 1048576)
+
+    if(enableReusePort == true)
+      udpBootstrap.option(EpollChannelOption.SO_REUSEPORT, Boolean.box(true))
+      
     //try{
       udpBootstrap.bind(new InetSocketAddress(dnsServerIp, 53)).sync()
     // }
