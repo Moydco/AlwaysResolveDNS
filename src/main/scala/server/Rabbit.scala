@@ -101,14 +101,6 @@ class Rabbit extends Runnable {
 
   def domainUpdate(updateMap: scala.collection.mutable.Map[String, String]) = {
     val data = updateMap
-    // if (data.get("delete") != None)
-    // {
-    //   DNSAuthoritativeSection.removeDomain(data("delete").split("""\.""").toList)
-    //   logger.debug("Zone list before removing: " + HttpToDns.zones.foldLeft("")((a,b)=> a+" "+b) ) 
-    //   HttpToDns.zones = HttpToDns.zones diff Array(data("delete"))
-    //   logger.debug("Zone list after removing: "+ HttpToDns.zones.foldLeft("")((a,b)=> a+" "+b) )
-    // } 
-    // else 
     if (data.get("data") != None) {
       val domainCandidate = try {
         val domain = JsonIO.Json.readValue(data("data"), classOf[ExtendedDomain])
@@ -123,29 +115,71 @@ class Rabbit extends Runnable {
         case ex: Exception => null
       }
       val replaceFilename = data.get("replace_filename").getOrElse(null)
-      val (validcode, messages) = DomainValidationService.validate(domainCandidate, replaceFilename)
-      if (validcode < 2) {
-        if (replaceFilename != null) {
-          //DNSCache.removeDomain(replaceFilename.split("""\.""").toList)
-          DNSAuthoritativeSection.removeDomain(replaceFilename.split("""\.""").toList)
-          //JsonIO.removeAuthData(replaceFilename)
-        }
-        val domains = DomainValidationService.reorganize(domainCandidate)
-        //DNSCache.setDomain(domains.head)
-        DNSAuthoritativeSection.setDomain(domains.head)
-        //JsonIO.storeAuthData(domains.head)
-        val response = "{\"code\":" + validcode + ",\"messages\":" + messages.mkString("[\"", "\",\"", "\"]") + ",\"data\":" + 
-         JsonIO.Json.writeValueAsString(domains) + "}"
-        NotifyUtil.notify(domainCandidate)
-        
-        response               
 
-      } else {
-        "{\"code\":" + validcode + ",\"messages\":" + messages.mkString("[\"", "\",\"", "\"]") + "}"
+      if (replaceFilename != null) {
+        //DNSCache.removeDomain(replaceFilename.split("""\.""").toList)
+        DNSAuthoritativeSection.removeDomain(replaceFilename.split("""\.""").toList)
+        //JsonIO.removeAuthData(replaceFilename)
       }
+      val domains = DomainValidationService.reorganize(domainCandidate)
+      //DNSCache.setDomain(domains.head)
+      DNSAuthoritativeSection.setDomain(domains.head)
+      //JsonIO.storeAuthData(domains.head)
+      NotifyUtil.notify(domainCandidate)
+        
     } else {
       throw new Exception("Unidentified error")
-      // "{\"code\":2,\"message\":\"Error: Unknown request\"}"
-    }
+    }      
   }
+
+  // NON usare, contiene ancora la validazione della zona che è rotta.
+  // def domainUpdate(updateMap: scala.collection.mutable.Map[String, String]) = {
+  //   val data = updateMap
+  //   // if (data.get("delete") != None)
+  //   // {
+  //   //   DNSAuthoritativeSection.removeDomain(data("delete").split("""\.""").toList)
+  //   //   logger.debug("Zone list before removing: " + HttpToDns.zones.foldLeft("")((a,b)=> a+" "+b) ) 
+  //   //   HttpToDns.zones = HttpToDns.zones diff Array(data("delete"))
+  //   //   logger.debug("Zone list after removing: "+ HttpToDns.zones.foldLeft("")((a,b)=> a+" "+b) )
+  //   // } 
+  //   // else 
+  //   if (data.get("data") != None) {
+  //     val domainCandidate = try {
+  //       val domain = JsonIO.Json.readValue(data("data"), classOf[ExtendedDomain])
+  //       domain.settings.foldRight(domain) {
+  //         case (soa, domain) =>
+  //           val newSoa = soa.updateSerial(
+  //             if (soa.serial == null || soa.serial == "") SerialParser.generateNewSerial.toString
+  //             else SerialParser.updateSerial(soa.serial).toString)
+  //           domain.removeHost(soa).addHost(newSoa)
+  //       }
+  //     } catch {
+  //       case ex: Exception => null
+  //     }
+  //     val replaceFilename = data.get("replace_filename").getOrElse(null)
+  //     val (validcode, messages) = DomainValidationService.validate(domainCandidate, replaceFilename)
+  //     if (validcode < 2) {
+  //       if (replaceFilename != null) {
+  //         //DNSCache.removeDomain(replaceFilename.split("""\.""").toList)
+  //         DNSAuthoritativeSection.removeDomain(replaceFilename.split("""\.""").toList)
+  //         //JsonIO.removeAuthData(replaceFilename)
+  //       }
+  //       val domains = DomainValidationService.reorganize(domainCandidate)
+  //       //DNSCache.setDomain(domains.head)
+  //       DNSAuthoritativeSection.setDomain(domains.head)
+  //       //JsonIO.storeAuthData(domains.head)
+  //       val response = "{\"code\":" + validcode + ",\"messages\":" + messages.mkString("[\"", "\",\"", "\"]") + ",\"data\":" + 
+  //        JsonIO.Json.writeValueAsString(domains) + "}"
+  //       NotifyUtil.notify(domainCandidate)
+        
+  //       //response               
+
+  //     } else {
+  //       "{\"code\":" + validcode + ",\"messages\":" + messages.mkString("[\"", "\",\"", "\"]") + "}"
+  //     }
+  //   } else {
+  //     throw new Exception("Unidentified error")
+  //     // "{\"code\":2,\"message\":\"Error: Unknown request\"}"
+  //   }
+  // }
 }
