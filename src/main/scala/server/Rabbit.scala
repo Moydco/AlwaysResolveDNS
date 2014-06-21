@@ -69,14 +69,14 @@ class Rabbit extends Runnable {
           case e:java.lang.StringIndexOutOfBoundsException => logger.error("Wrong format of Rabbit message. In most cases, the plus is missing.")
           case e:java.text.ParseException => logger.error(e.getMessage)
           case e:com.rabbitmq.client.ShutdownSignalException => logger.error("Rabbit server was turned off."); System.exit(1);
-          case _:Throwable => logger.error("Unidentified error in zone update request.")
+          //case _:Throwable => logger.error("Unidentified error in zone update request.")
         }
       }
     } catch {
       case e:java.net.ConnectException => logger.error("Unable to connect to Rabbit server."); System.exit(1);
       // La prossima eccezione è "shadowed" dal catch più interno
       case e:com.rabbitmq.client.ShutdownSignalException => logger.error("Rabbit server was turned off."); System.exit(1);
-      case _:Throwable => logger.error("Generic error, turning off."); System.exit(1);
+      //case _:Throwable => logger.error("Generic error, turning off."); System.exit(1);
     }
   }
 
