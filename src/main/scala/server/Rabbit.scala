@@ -69,14 +69,14 @@ class Rabbit extends Runnable {
           case e:java.lang.StringIndexOutOfBoundsException => logger.error("Wrong format of Rabbit message. In most cases, the plus is missing.")
           case e:java.text.ParseException => logger.error(e.getMessage)
           case e:com.rabbitmq.client.ShutdownSignalException => logger.error("Rabbit server was turned off."); System.exit(1);
-          case _:Throwable => logger.error("Unidentified error in zone update request.")
+          //case _:Throwable => logger.error("Unidentified error in zone update request.")
         }
       }
     } catch {
       case e:java.net.ConnectException => logger.error("Unable to connect to Rabbit server."); System.exit(1);
       // La prossima eccezione è "shadowed" dal catch più interno
       case e:com.rabbitmq.client.ShutdownSignalException => logger.error("Rabbit server was turned off."); System.exit(1);
-      case _:Throwable => logger.error("Generic error, turning off."); System.exit(1);
+      //case _:Throwable => logger.error("Generic error, turning off."); System.exit(1);
     }
   }
 
@@ -101,14 +101,6 @@ class Rabbit extends Runnable {
 
   def domainUpdate(updateMap: scala.collection.mutable.Map[String, String]) = {
     val data = updateMap
-    // if (data.get("delete") != None)
-    // {
-    //   DNSAuthoritativeSection.removeDomain(data("delete").split("""\.""").toList)
-    //   logger.debug("Zone list before removing: " + HttpToDns.zones.foldLeft("")((a,b)=> a+" "+b) ) 
-    //   HttpToDns.zones = HttpToDns.zones diff Array(data("delete"))
-    //   logger.debug("Zone list after removing: "+ HttpToDns.zones.foldLeft("")((a,b)=> a+" "+b) )
-    // } 
-    // else 
     if (data.get("data") != None) {
       val domainCandidate = try {
         val domain = JsonIO.Json.readValue(data("data"), classOf[ExtendedDomain])
@@ -123,29 +115,71 @@ class Rabbit extends Runnable {
         case ex: Exception => null
       }
       val replaceFilename = data.get("replace_filename").getOrElse(null)
-      val (validcode, messages) = DomainValidationService.validate(domainCandidate, replaceFilename)
-      if (validcode < 2) {
-        if (replaceFilename != null) {
-          //DNSCache.removeDomain(replaceFilename.split("""\.""").toList)
-          DNSAuthoritativeSection.removeDomain(replaceFilename.split("""\.""").toList)
-          //JsonIO.removeAuthData(replaceFilename)
-        }
-        val domains = DomainValidationService.reorganize(domainCandidate)
-        //DNSCache.setDomain(domains.head)
-        DNSAuthoritativeSection.setDomain(domains.head)
-        //JsonIO.storeAuthData(domains.head)
-        val response = "{\"code\":" + validcode + ",\"messages\":" + messages.mkString("[\"", "\",\"", "\"]") + ",\"data\":" + 
-         JsonIO.Json.writeValueAsString(domains) + "}"
-        NotifyUtil.notify(domainCandidate)
-        
-        response               
 
-      } else {
-        "{\"code\":" + validcode + ",\"messages\":" + messages.mkString("[\"", "\",\"", "\"]") + "}"
+      if (replaceFilename != null) {
+        //DNSCache.removeDomain(replaceFilename.split("""\.""").toList)
+        DNSAuthoritativeSection.removeDomain(replaceFilename.split("""\.""").toList)
+        //JsonIO.removeAuthData(replaceFilename)
       }
+      val domains = DomainValidationService.reorganize(domainCandidate)
+      //DNSCache.setDomain(domains.head)
+      DNSAuthoritativeSection.setDomain(domains.head)
+      //JsonIO.storeAuthData(domains.head)
+      NotifyUtil.notify(domainCandidate)
+        
     } else {
       throw new Exception("Unidentified error")
-      // "{\"code\":2,\"message\":\"Error: Unknown request\"}"
-    }
+    }      
   }
+
+  // NON usare, contiene ancora la validazione della zona che è rotta.
+  // def domainUpdate(updateMap: scala.collection.mutable.Map[String, String]) = {
+  //   val data = updateMap
+  //   // if (data.get("delete") != None)
+  //   // {
+  //   //   DNSAuthoritativeSection.removeDomain(data("delete").split("""\.""").toList)
+  //   //   logger.debug("Zone list before removing: " + HttpToDns.zones.foldLeft("")((a,b)=> a+" "+b) ) 
+  //   //   HttpToDns.zones = HttpToDns.zones diff Array(data("delete"))
+  //   //   logger.debug("Zone list after removing: "+ HttpToDns.zones.foldLeft("")((a,b)=> a+" "+b) )
+  //   // } 
+  //   // else 
+  //   if (data.get("data") != None) {
+  //     val domainCandidate = try {
+  //       val domain = JsonIO.Json.readValue(data("data"), classOf[ExtendedDomain])
+  //       domain.settings.foldRight(domain) {
+  //         case (soa, domain) =>
+  //           val newSoa = soa.updateSerial(
+  //             if (soa.serial == null || soa.serial == "") SerialParser.generateNewSerial.toString
+  //             else SerialParser.updateSerial(soa.serial).toString)
+  //           domain.removeHost(soa).addHost(newSoa)
+  //       }
+  //     } catch {
+  //       case ex: Exception => null
+  //     }
+  //     val replaceFilename = data.get("replace_filename").getOrElse(null)
+  //     val (validcode, messages) = DomainValidationService.validate(domainCandidate, replaceFilename)
+  //     if (validcode < 2) {
+  //       if (replaceFilename != null) {
+  //         //DNSCache.removeDomain(replaceFilename.split("""\.""").toList)
+  //         DNSAuthoritativeSection.removeDomain(replaceFilename.split("""\.""").toList)
+  //         //JsonIO.removeAuthData(replaceFilename)
+  //       }
+  //       val domains = DomainValidationService.reorganize(domainCandidate)
+  //       //DNSCache.setDomain(domains.head)
+  //       DNSAuthoritativeSection.setDomain(domains.head)
+  //       //JsonIO.storeAuthData(domains.head)
+  //       val response = "{\"code\":" + validcode + ",\"messages\":" + messages.mkString("[\"", "\",\"", "\"]") + ",\"data\":" + 
+  //        JsonIO.Json.writeValueAsString(domains) + "}"
+  //       NotifyUtil.notify(domainCandidate)
+        
+  //       //response               
+
+  //     } else {
+  //       "{\"code\":" + validcode + ",\"messages\":" + messages.mkString("[\"", "\",\"", "\"]") + "}"
+  //     }
+  //   } else {
+  //     throw new Exception("Unidentified error")
+  //     // "{\"code\":2,\"message\":\"Error: Unknown request\"}"
+  //   }
+  // }
 }
