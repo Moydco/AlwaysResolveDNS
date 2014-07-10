@@ -83,9 +83,14 @@ class Rabbit extends Runnable {
   def updateZone(zone: String) = {
     if(LOAD_FROM_HTTP == true) {
       val temp = HttpToDns.getZoneFromHttp(zone)
-      DNSAuthoritativeSection.removeDomain(zone.split("""\.""").toList)
-      DNSAuthoritativeSection.setDomain(temp)
-      logger.debug("Zone set")
+      temp match {
+        case Some(zoneUpdated) => {
+          DNSAuthoritativeSection.removeDomain(zone.split("""\.""").toList)
+          DNSAuthoritativeSection.setDomain(zoneUpdated)
+          logger.debug("Zone "+zone+" set")
+        }
+        case None => logger.error("Zone "+zone+" not updated")
+      }      
     }
     else {
       val map = mutable.Map.empty[String, String]

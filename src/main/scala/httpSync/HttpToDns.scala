@@ -47,12 +47,25 @@ object HttpToDns {
 		logger.debug(zones.toString)
 	}
 
-	def getZoneFromHttp(zonename: String):ExtendedDomain = {
+	def getZoneFromHttp(zonename: String):Option[ExtendedDomain] = {
     	val temp = Http(HTTP_REQUEST_ZONE).param("zone", zonename).param("region", REGION)
     		.param("api_key", API_KEY).param("api_secret", API_SECRET)
 			.option(HttpOptions.connTimeout(HTTP_TIMEOUT)).option(HttpOptions.readTimeout(HTTP_TIMEOUT))
-		//logger.debug("ResponseCode from zone update: "+temp.responseCode.toString)
-		Json.readValue(temp.asString, classOf[ExtendedDomain])
+		logger.debug("ResponseCode from "+zonename+" update: "+temp.responseCode.toString)
+		if(temp.responseCode != 404)
+		{
+			try {
+				Option(Json.readValue(temp.asString, classOf[ExtendedDomain]))
+			}
+			catch {
+				case ex: JsonParseException => {
+					logger.error("Broken json")
+					None
+				}
+			}
+		}
+		else
+			None
 	}
 
 	def loadZonesInMemory = {
