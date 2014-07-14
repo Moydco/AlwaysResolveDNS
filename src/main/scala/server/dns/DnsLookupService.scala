@@ -202,7 +202,7 @@ object DnsLookupService {
       case host: CnameHost =>
         // Se viene richiesto proprio un record cname. Tipo dig cname www2.example.com. Non risolve il cname
         if(qtype == RecordType.CNAME.id || !followCnames) {
-          addRecord(host, oldDomain, Nil, records)
+          addRecord(host.toAbsoluteNames(domain), oldDomain, Nil, records)
         }
         /* Altrimenti vai a vedere a cosa punta, a meno che non sia già stato visto. 
         Questo pezzo di codice è quello che fa funzionare le query A sui cname: restituisce sia il cname,
