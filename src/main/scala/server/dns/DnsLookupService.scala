@@ -215,7 +215,7 @@ object DnsLookupService {
                 (qname, DNSAuthoritativeSection.getDomain(qtype, qname), host)
               }
 
-            records ++ newDomain.getHosts(relativeHostName(qname, newDomain))
+            var results = records ++ newDomain.getHosts(relativeHostName(qname, newDomain))
               .filter(h => h.typ == RecordType(qtype).toString || h.typ == RecordType.CNAME.toString)
               .map {h =>
                 val absCname = absoluteHostName(newHost.hostname, newDomain.fullName)
@@ -223,6 +223,10 @@ object DnsLookupService {
                 //resolveHost(domain, _, qtype, absCname :: usedCnames, (absHostname, newHost.toRData) :: shownCnames, newDomain, followCnames)
                 resolveHost(newDomain, h, qtype, absCname :: usedCnames, (absHostname, newHost.copy(hostnames = Array[WeightedCNAME](new WeightedCNAME(cname = absCname))).toRData) :: shownCnames, domain, followCnames)
               }.flatten
+            /* L'idea è che se arriva vuota la lista non ha trovato niente. Quindi ci metto almeno il cname appendendo il nome di zona. */
+            if(results.size == 0)
+              results = addRecord(host.toAbsoluteNames(domain), oldDomain, shownCnames, results)
+            results
           } catch {
             // Cname points to an external domain, search cache
             // Add the last internal result to the Cnames only if the host name is resolved
