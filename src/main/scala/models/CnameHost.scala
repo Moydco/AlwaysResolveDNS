@@ -24,7 +24,8 @@ case class CnameHost(
     }
     else if(randomizeRecords == true) 
     {
-      Random.shuffle(hostnames.toList).head.cname
+      val rand = Random.nextInt(hostnames.length)
+      hostnames(rand).cname
     }
     else hostnames(0).cname
   }
@@ -42,8 +43,9 @@ case class CnameHost(
     Vedere commento per record A
     */
     val list = hostnames.map(wcname => wcname.weightCNAME.map(cname => 
-      new CNAME((cname.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, timetolive) )).flatten.toList
-    Random.shuffle(list).head
+      new CNAME((cname.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, timetolive) )).flatten
+    val rand = Random.nextInt(hostnames.length)
+    list(rand)
   }
   else hostnames.map(wcname => 
     wcname.weightCNAME.map(cname => new CNAME((cname.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, timetolive))).flatten

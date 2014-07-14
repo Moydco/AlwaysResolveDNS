@@ -201,8 +201,14 @@ object DnsLookupService {
     host match {
       case host: CnameHost =>
         // Se viene richiesto proprio un record cname. Tipo dig cname www2.example.com. Non risolve il cname
-        if(qtype == RecordType.CNAME.id || !followCnames) addRecord(host, oldDomain, Nil, records)
-        // Altrimenti vai a vedere a cosa punta, a meno che non sia già stato visto. In tal caso...
+        if(qtype == RecordType.CNAME.id || !followCnames) {
+          addRecord(host, oldDomain, Nil, records)
+        }
+        /* Altrimenti vai a vedere a cosa punta, a meno che non sia già stato visto. 
+        Questo pezzo di codice è quello che fa funzionare le query A sui cname: restituisce sia il cname,
+        sia il record a a cui punta. Attenzione che il cname deve finire con il punto altrimenti
+        appende il nome del dominio
+        */
         else if (!usedCnames.contains(absoluteHostName(host.hostname, domain.fullName)))
           try {
             val (qname, newDomain, newHost) =
@@ -210,6 +216,7 @@ object DnsLookupService {
                 val qname = oldDomain.nameParts.toList
                 (qname, oldDomain, host.changeHostname(qname.mkString(".") + "."))
               } else {
+                // Questo è il punto in cui verifica se c'è il punto alla fine del cname
                 val qname = absoluteHostName(host.hostname, domain.fullName).split("""\.""").toList
                 //(qname, DNSCache.getDomain(qtype, qname), host)
                 (qname, DNSAuthoritativeSection.getDomain(qtype, qname), host)

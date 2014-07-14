@@ -27,6 +27,14 @@ object HttpToDns {
 	val REGION = ConfigService.config.getString("region")
 	val HTTP_TIMEOUT = ConfigService.config.getInt("httpTimeoutForZoneUpdate")
 
+	private val Json = {
+	    val m = new ObjectMapper()
+	    m.registerModule(DefaultScalaModule)
+	    m.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+	    m.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
+	    m
+	}	
+
 	def getZonesNames = {
 		var temp = ""
 		try { 
@@ -39,21 +47,34 @@ object HttpToDns {
 		logger.debug(zones.toString)
 	}
 
+	def getZoneFromHttp(zonename: String):Option[ExtendedDomain] = {
+    	val temp = Http(HTTP_REQUEST_ZONE).param("zone", zonename).param("region", REGION)
+    		.param("api_key", API_KEY).param("api_secret", API_SECRET)
+			.option(HttpOptions.connTimeout(HTTP_TIMEOUT)).option(HttpOptions.readTimeout(HTTP_TIMEOUT))
+		logger.debug("ResponseCode from "+zonename+" update: "+temp.responseCode.toString)
+		if(temp.responseCode != 404)
+		{
+			try {
+				Option(Json.readValue(temp.asString, classOf[ExtendedDomain]))
+			}
+			catch {
+				case ex: JsonParseException => {
+					logger.error("Broken json")
+					None
+				}
+			}
+		}
+		else
+			None
+	}
+
 	def loadZonesInMemory = {
 		loadData
 	}
 
-	def loadSingleZone(zone: String) = {
+	/*def loadSingleZone(zone: String) = {
 		loadDataOfType(Array(zone), classOf[ExtendedDomain]) { DNSAuthoritativeSection.setDomain(_) }
-	}
-
-	private val Json = {
-	    val m = new ObjectMapper()
-	    m.registerModule(DefaultScalaModule)
-	    m.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-	    m.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
-	    m
-	}
+	}*/
   
   	private def loadData = {
 	    loadDataOfType(zones, classOf[ExtendedDomain]) { DNSAuthoritativeSection.setDomain(_) }
