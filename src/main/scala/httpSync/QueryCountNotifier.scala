@@ -52,11 +52,12 @@ class QueryCountNotifier extends TimerTask {
 	   	//  	val temp = Http.postData(HTTP_SEND_QUERY_COUNT, json).header("content-type", "application/json")
 				// .option(HttpOptions.connTimeout(HTTP_TIMEOUT))
 
+			// Attenzione che l'indirizzo deve essere comprensivo di http://
 	    	val temp = Http.post(HTTP_SEND_QUERY_COUNT).params("json" -> json)
-				.option(HttpOptions.connTimeout(HTTP_TIMEOUT))			
+				.option(HttpOptions.connTimeout(HTTP_TIMEOUT)).asString
 			//logger.debug(temp.toString)
 	    } catch {
-      		case ex: Exception => logger.warn("Error in query count post.")
+      		case ex: Exception => logger.warn("Error in query count post." + ex.getMessage());
 	    }
 
 	    // Resetta il contatore per ogni dominio
