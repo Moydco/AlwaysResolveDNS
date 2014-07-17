@@ -53,7 +53,7 @@ class QueryCountNotifier extends TimerTask {
 				// .option(HttpOptions.connTimeout(HTTP_TIMEOUT))
 
 			// Attenzione che l'indirizzo deve essere comprensivo di http://
-	    	val temp = Http.post(HTTP_SEND_QUERY_COUNT).params("json" -> json)
+	    	val temp = Http.post(HTTP_SEND_QUERY_COUNT).params("json" -> json, "api_key" -> API_KEY, "api_secret" -> API_SECRET)
 				.option(HttpOptions.connTimeout(HTTP_TIMEOUT)).asString
 			//logger.debug(temp.toString)
 	    } catch {
