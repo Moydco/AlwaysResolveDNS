@@ -61,7 +61,7 @@ class QueryCountNotifier extends TimerTask {
 	    }
 
 	    // Resetta il contatore per ogni dominio
-	    for( domain <- queryCountMap.keys ) queryCountMap.put(domain, 1)
+	    for( domain <- queryCountMap.keys ) queryCountMap.put(domain, 0)
 	}
 }
 
