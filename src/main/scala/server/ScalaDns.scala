@@ -2,7 +2,6 @@ package server
 
 import org.slf4j.LoggerFactory
 import domainio.JsonIO
-import utils.UserCreator
 import datastructures.DNSCache
 import enums.RecordType
 import server.dns.DnsLookupService
@@ -34,7 +33,6 @@ object ScalaDns {
     if(loadFromDisk == true)
     {
       JsonIO.loadData
-      JsonIO.loadUsers()
     }
     else
     {

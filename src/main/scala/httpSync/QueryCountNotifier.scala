@@ -9,27 +9,36 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import java.text.SimpleDateFormat
 import java.util.concurrent.ConcurrentHashMap
 import java.util.TimerTask
-import scala.collection.JavaConversions._
+import scala.collection.concurrent.TrieMap
 
 import datastructures.DNSAuthoritativeSection
 import models.ExtendedDomain
 import configs.ConfigService
 
 object QueryCountNotifier {
-	var queryCountMap = new ConcurrentHashMap[String, Long]()
-
 	val logger = LoggerFactory.getLogger("Httprequests")
 
 	val API_KEY = ConfigService.config.getString("apiKey")
 	val API_SECRET = ConfigService.config.getString("apiSecret")
 	
+	var queryCountMap = new TrieMap[String, Long]()
 
+	// Inizializza a zero tutti i domini. In caso di aggiunta di nuovi domini andranno refreshati.
+	DNSAuthoritativeSection.getDomainNames.foreach(queryCountMap.put(_, 0))
+
+	// Controlla solo i domini che non ci sono, e rimuovi quelli cancellati
+	def refreshDomains() = {
+		DNSAuthoritativeSection.getDomainNames.filter(!queryCountMap.contains(_)).foreach(queryCountMap.put(_, 0))
+		queryCountMap.filterNot(x=>DNSAuthoritativeSection.getDomainNames.contains(x._1)).foreach(x=>queryCountMap.remove(x._1))
+		queryCountMap.foreach(x=>logger.debug(x._1))
+	}
+	
 	def incrementDomain(domain: String) = {
-		val temp = queryCountMap.get(domain)
-		if(temp==null)
-			queryCountMap.put(domain, 1)
-		else
-			queryCountMap.put(domain, temp+1)
+		val dom = queryCountMap.get(domain)
+		dom match {
+			case Some(count) => queryCountMap.put(domain, count+1)
+			case None => queryCountMap.put(domain, 1)
+		}
 	}
 }
 
@@ -45,7 +54,7 @@ class QueryCountNotifier extends TimerTask {
 	override def run() {
 		val m = new ObjectMapper()
 		m.registerModule(DefaultScalaModule)
-		val values = for( domain <- queryCountMap.keys ) yield (domain, queryCountMap.get(domain))
+		val values = queryCountMap.toIterator
 		val json = m.writeValueAsString(new JsonMessage(SERVER_ID, REGION, values))
 		logger.debug(json)
 		try {

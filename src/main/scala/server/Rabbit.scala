@@ -16,6 +16,7 @@ import domainio.DomainValidationService
 import models.ExtendedDomain
 import utils.{NotifyUtil, SerialParser}
 import configs.ConfigService
+import httpSync.QueryCountNotifier
 
 class Rabbit extends Runnable {
 
@@ -60,6 +61,8 @@ class Rabbit extends Runnable {
           case "data"   => domainUpdate(mutable.Map(key -> content))
           case _        => throw new java.text.ParseException("Rabbit message not starting with data, update or delete.", 0)
         }
+
+        QueryCountNotifier.refreshDomains()
         
         // val map = mutable.Map.empty[String, String]
         // map(key)=content

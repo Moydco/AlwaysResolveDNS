@@ -10,7 +10,7 @@ resolvers += "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshot
 
 //resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
-libraryDependencies += "io.netty" % "netty-all" % "4.0.21.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.0.23.Final"
 
 //libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.3"
  
@@ -24,13 +24,13 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2"
 
 libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.4.1"
 
-libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.4.1.1"
+libraryDependencies += "com.fasterxml.jackson.core" % "jackson-core" % "2.4.2"
 
-libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.15"
+libraryDependencies += "org.scalaj" %% "scalaj-http" % "0.3.16"
 
 libraryDependencies += "org.scala-lang.modules" % "scala-xml_2.11" % "1.0.2"
 
-libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.3.4"
+libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.3.5"
 
 seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
 

@@ -28,8 +28,6 @@ import com.fasterxml.jackson.databind.DeserializationConfig
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.annotation.JsonInclude
-import models.User
-import datastructures.UserCache
 import datastructures.DNSAuthoritativeSection
 
 object JsonIO {
@@ -84,10 +82,6 @@ object JsonIO {
       case ex: JsonParseException => logger.warn("Broken json file: " + file.getAbsolutePath)
     }
   
-  def loadUsers(userFile: File = userPath) = 
-    if(userFile.exists) 
-      Json.readValue(userFile, classOf[Array[User]]).foreach(user => UserCache.addUser(user))
-  
   def storeData[T](data: T, name: String, path: String) = {
     logger.debug(applicationRoot + path + "/" + name + "json")
     Json.writeValue(new File(applicationRoot + path + "/" + name + "json"), data)
@@ -108,6 +102,5 @@ object JsonIO {
     removeData(if(name.startsWith("*")) "-wildcard" + name.substring(1) else name, cacheDataPathStr)
   //def removeSBeltData(domain: ExtendedDomain) = removeData(domain.getFilename, authDataPathStr)
   
-  def updateUsers(userFile: File = userPath) = Json.writeValue(userFile, UserCache.users.toArray)
   
 }
