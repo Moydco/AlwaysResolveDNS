@@ -61,7 +61,7 @@ object AAAA {
       }
       // *
       case 255 => null // not implemented yet
-      case _ => throw new Error("Unknown record type")
+      case _ => throw new Error("Unknown record type. Class: " + Integer.toString(recordclass))
     }
     new AAAA(record)
   }

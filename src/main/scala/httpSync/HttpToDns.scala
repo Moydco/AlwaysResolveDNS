@@ -59,7 +59,7 @@ object HttpToDns {
 			}
 			catch {
 				case ex: JsonParseException => {
-					logger.error("Broken json")
+					logger.error("Broken json: " + temp)
 					None
 				}
 			}
