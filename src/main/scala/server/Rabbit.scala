@@ -8,6 +8,7 @@ import httpSync.{HttpToDns, QueryCountNotifier}
 import models.ExtendedDomain
 import org.slf4j.LoggerFactory
 import utils.{NotifyUtil, SerialParser}
+import org.apache.commons.lang3.exception.ExceptionUtils
 
 import scala.collection.mutable
 
@@ -65,7 +66,7 @@ class Rabbit extends Runnable {
 					case e: java.lang.StringIndexOutOfBoundsException => logger.error("Wrong format of Rabbit message. In most cases, the plus is missing.")
 					case e: java.text.ParseException => logger.error(e.getMessage)
 					case e: com.rabbitmq.client.ShutdownSignalException => logger.error("Rabbit server was turned off."); System.exit(1);
-					//case _:Throwable => logger.error("Unidentified error in zone update request.")
+					case e:Throwable => logger.error("Error in zone update request: " + ExceptionUtils.getMessage(e) + " " + ExceptionUtils.getStackTrace(e))
 				}
 			}
 		} catch {
@@ -77,21 +78,25 @@ class Rabbit extends Runnable {
 	}
 
 	def updateZone(zone: String) = {
-		if (LOAD_FROM_HTTP == true) {
-			val temp = HttpToDns.getZoneFromHttp(zone)
-			temp match {
-				case Some(zoneUpdated) => {
-					DNSAuthoritativeSection.removeDomain(zone.split( """\.""").toList)
-					DNSAuthoritativeSection.setDomain(zoneUpdated)
-					logger.debug("Zone " + zone + " set")
+		try {
+			if (LOAD_FROM_HTTP == true) {
+				val temp = HttpToDns.getZoneFromHttp(zone)
+				temp match {
+					case Some(zoneUpdated) => {
+						DNSAuthoritativeSection.removeDomain(zone.split( """\.""").toList)
+						DNSAuthoritativeSection.setDomain(zoneUpdated)
+						logger.debug("Zone " + zone + " set")
+					}
+					case None => logger.error("Zone " + zone + " not updated")
 				}
-				case None => logger.error("Zone " + zone + " not updated")
 			}
-		}
-		else {
-			val map = mutable.Map.empty[String, String]
-			map("data") = zone
-			domainUpdate(map)
+			else {
+				val map = mutable.Map.empty[String, String]
+				map("data") = zone
+				domainUpdate(map)
+			}
+		} catch {
+			case e: Throwable => logger.error("Error in zone update for: " + zone + " of type: " + ExceptionUtils.getMessage(e) + " " + ExceptionUtils.getStackTrace(e))
 		}
 	}
 
@@ -115,7 +120,7 @@ class Rabbit extends Runnable {
 						domain.removeHost(soa).addHost(newSoa)
 				}
 			} catch {
-				case ex: Exception => null
+				case ex: Exception => throw ex
 			}
 			val replaceFilename = data.get("replace_filename").getOrElse(null)
 
