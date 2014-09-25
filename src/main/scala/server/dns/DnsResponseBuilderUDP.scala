@@ -37,6 +37,7 @@ object DnsResponseBuilderUDP {
   def apply(message: Message, sourceIP: String, maxLength: Int = -1, compress: Boolean = true) = {
     val response = try {
       val responseParts = message.query.map { query =>
+			logger.debug("Query type: " + Integer.toString(query.qtype))
         val qname = query.qname.filter(_.length > 0).map(new String(_, "UTF-8").toLowerCase)
         //val domain = DNSCache.getDomain(query.qtype, qname)
         val domain = DNSAuthoritativeSection.getDomain(query.qtype, qname)

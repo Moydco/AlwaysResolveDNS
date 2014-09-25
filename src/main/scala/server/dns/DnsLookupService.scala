@@ -26,9 +26,10 @@ object DnsLookupService {
   */
   def hostToRecords(qname: List[String], qtype: Int, qclass: Int, followCnames: Boolean = true): List[(String, AbstractRecord)] = {
     //val domain = DNSCache.getDomain(qtype, qname)
+	  logger.debug("Query type: " + Integer.toString(qtype))
     val domain = DNSAuthoritativeSection.getDomain(qtype, qname)
 
-    // logger.debug("<<<<<<<<<<<<<<<<<<<<<")
+
     // domain.getHosts(relativeHostName(qname, domain)).foreach(record=>logger.debug(record.name))
 
     /** Questo match serve a prendere tutti i record in caso di query any. Probabilmente in seguito servirà a gestire

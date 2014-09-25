@@ -85,6 +85,8 @@ object RRData {
       case 28 => AAAA(buf, recordclass, size)
       // SRV
       case 33 => SRV(buf, recordclass, size)
+		// DNSKEY
+		case 48 => DNSKEY(buf, recordclass, size)
       // AXFR
       case 252 => null
       // *
