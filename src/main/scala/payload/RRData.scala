@@ -6,31 +6,31 @@ import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 
 case class RRData(
-  name: List[Array[Byte]],
-  rtype: Int,
-  rclass: Int,
-  ttl: Long,
-  rdlength: Int,
-  rdata: AbstractRecord
-) {
+                   name: List[Array[Byte]],
+                   rtype: Int,
+                   rclass: Int,
+                   ttl: Long,
+                   rdlength: Int,
+                   rdata: AbstractRecord
+                   ) {
   def toByteArray = {
-    Name.toByteArray(name) ++ RRData.shortToBytes(rtype.toShort) ++ 
-    RRData.shortToBytes(rclass.toShort) ++ RRData.intToBytes(ttl.toInt) ++ RRData.shortToBytes(rdlength.toShort) ++ rdata.toByteArray
+    Name.toByteArray(name) ++ RRData.shortToBytes(rtype.toShort) ++
+      RRData.shortToBytes(rclass.toShort) ++ RRData.intToBytes(ttl.toInt) ++ RRData.shortToBytes(rdlength.toShort) ++ rdata.toByteArray
   }
-  
+
   def toCompressedByteArray(input: (Array[Byte], Map[String, Int])) = {
     val nameBytes = Name.toCompressedByteArray(name, input)
-    val rrHeaderBytes = nameBytes._1 ++ RRData.shortToBytes(rtype.toShort) ++ RRData.shortToBytes(rclass.toShort) ++ 
+    val rrHeaderBytes = nameBytes._1 ++ RRData.shortToBytes(rtype.toShort) ++ RRData.shortToBytes(rclass.toShort) ++
       RRData.intToBytes(ttl.toInt)
     val compressedRData = rdata.toCompressedByteArray((rrHeaderBytes ++ RRData.shortToBytes(0.toShort), nameBytes._2))
     val newRDLength = compressedRData._1.length - rrHeaderBytes.length - 2
     (rrHeaderBytes ++ RRData.shortToBytes(newRDLength.toShort) ++ compressedRData._1.takeRight(newRDLength), compressedRData._2)
   }
-  
-  override def toString = 
+
+  override def toString =
     name.map(new String(_, "UTF-8")).mkString(".") + "," +
-    rtype + "," + rclass + "," + ttl + "," + rdlength + "," + rdata.toString
-    
+      rtype + "," + rclass + "," + ttl + "," + rdlength + "," + rdata.toString
+
 }
 
 object RRData {
@@ -47,7 +47,7 @@ object RRData {
     new RRData(name, rtype, rclass, ttl, rdlength, rdata)
   }
 
-  private def deserializeRecord(buf: ByteBuf, recordtype: Int, recordclass: Int, size: Int, offset: Int) = 
+  private def deserializeRecord(buf: ByteBuf, recordtype: Int, recordclass: Int, size: Int, offset: Int) =
     recordtype match {
       // A 
       case 1 => A(buf, recordclass, size)
@@ -85,8 +85,10 @@ object RRData {
       case 28 => AAAA(buf, recordclass, size)
       // SRV
       case 33 => SRV(buf, recordclass, size)
-		// DNSKEY
-		case 48 => DNSKEY(buf, recordclass, size)
+      // DNSKEY
+      case 46 => RRSIG(buf, recordclass, size)
+      // DNSKEY
+      case 48 => DNSKEY(buf, recordclass, size)
       // AXFR
       case 252 => null
       // *
@@ -97,41 +99,41 @@ object RRData {
         null
       }
     }
-  
-    def intToBytes(number: Int) = {
-      val buffer = ByteBuffer.allocate(4)
-      buffer.putInt(number)
-      buffer.array
-    }
-    
-    def longToBytes(number: Long) = {
-      val buffer = ByteBuffer.allocate(8)
-      buffer.putLong(number)
-      buffer.array
-    }
-    
-    def shortToBytes(number: Short) = {
-      val buffer = ByteBuffer.allocate(4)
-      buffer.putInt(number)
-      buffer.array.takeRight(2)
-    }
 
-    // def shortToBytesForSrvRecords(number: Short)= {
-    //   val logger = LoggerFactory.getLogger("app")
-    //   logger.debug(number.toString)
-    //   val buffer = ByteBuffer.allocate(2)
-    //   buffer.putShort(number)
-    //   buffer.flip
-    //   logger.debug(buffer.getShort.toString)
-    //   buffer.array
-    // }
+  def intToBytes(number: Int) = {
+    val buffer = ByteBuffer.allocate(4)
+    buffer.putInt(number)
+    buffer.array
+  }
 
-    
-    def shortToByte(number: Short) = {
-      val buffer = ByteBuffer.allocate(4)
-      buffer.putInt(number)
-      buffer.array.takeRight(1)
-    }
+  def longToBytes(number: Long) = {
+    val buffer = ByteBuffer.allocate(8)
+    buffer.putLong(number)
+    buffer.array
+  }
+
+  def shortToBytes(number: Short) = {
+    val buffer = ByteBuffer.allocate(4)
+    buffer.putInt(number)
+    buffer.array.takeRight(2)
+  }
+
+  // def shortToBytesForSrvRecords(number: Short)= {
+  //   val logger = LoggerFactory.getLogger("app")
+  //   logger.debug(number.toString)
+  //   val buffer = ByteBuffer.allocate(2)
+  //   buffer.putShort(number)
+  //   buffer.flip
+  //   logger.debug(buffer.getShort.toString)
+  //   buffer.array
+  // }
+
+
+  def shortToByte(number: Short) = {
+    val buffer = ByteBuffer.allocate(4)
+    buffer.putInt(number)
+    buffer.array.takeRight(1)
+  }
 
   //  private def deserializeBasedOnClass(buf: ChannelBuffer, rrecordclass: Int, size: Int) = {
   //    

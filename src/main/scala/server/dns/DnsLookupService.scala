@@ -21,8 +21,7 @@ object DnsLookupService {
 
   /** Metodo che raccoglie i record della richiesta corrente
   *
-  * Questo è il "punto di ingresso" alla costruzione delle risposte. Poi si va in profondità. Comunque
-  * è stato modificato per la randomizzazione dei record A.
+  * Questo è il "punto di ingresso" alla costruzione delle risposte. Poi si va in profondità.
   */
   def hostToRecords(qname: List[String], qtype: Int, qclass: Int, followCnames: Boolean = true): List[(String, AbstractRecord)] = {
     //val domain = DNSCache.getDomain(qtype, qname)
