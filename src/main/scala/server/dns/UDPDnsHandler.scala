@@ -63,7 +63,7 @@ class UDPDnsHandler extends SimpleChannelInboundHandler[DefaultAddressedEnvelope
 	}
 
 	override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-		logger.debug("Unexpected exception from downstream." + cause)
+		logger.error("Unexpected exception from downstream." + cause)
 		logger.error(cause.getMessage)
 		logger.error(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(cause))
 

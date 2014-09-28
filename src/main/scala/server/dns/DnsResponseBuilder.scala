@@ -68,9 +68,11 @@ object DnsResponseBuilder {
         
         // @TODO: Implement additional where appropriate
 
+        /**
+         * Guarda i record già trovati. Se ce ne sono del tipo elencato sotto, cerca record A associati?
+         */
         val additionals = {
-          /*if (query.qtype != RecordType.A.id) List[(String, AbstractRecord)]()
-          else */(records ++ authority).map {
+          (records ++ authority).map {
             case (name, record) =>
               try {
                 record match {

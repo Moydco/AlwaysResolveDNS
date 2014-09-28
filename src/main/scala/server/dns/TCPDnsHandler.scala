@@ -54,7 +54,7 @@ class TCPDnsHandler extends SimpleChannelInboundHandler[Object] {
 	}
 
   override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
-    logger.debug("Unexpected exception from downstream in tcp response: " + cause)
+    logger.error("Unexpected exception from downstream in tcp response: " + cause)
     logger.error(cause.getMessage)
     logger.error(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(cause))
 
