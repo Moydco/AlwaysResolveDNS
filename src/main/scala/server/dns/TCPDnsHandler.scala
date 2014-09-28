@@ -52,4 +52,13 @@ class TCPDnsHandler extends SimpleChannelInboundHandler[Object] {
 			}
 		}
 	}
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+    logger.debug("Unexpected exception from downstream in tcp response: " + cause)
+    logger.error(cause.getMessage)
+    logger.error(org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(cause))
+
+    // Non serve chiudere il canale con l'udp!
+    // https://github.com/netty/netty/blob/master/example/src/main/java/io/netty/example/qotm/QuoteOfTheMomentServerHandler.java
+  }
 }

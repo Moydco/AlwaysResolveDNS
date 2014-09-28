@@ -27,6 +27,10 @@ case class RRSIG(
     case _ => false
   }
 
+  /**
+   * Attenzione al parametro signerName: deve essere messo come label dns http://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-10
+   * @return
+   */
   def toByteArray = RRData.shortToBytes(typeCovered) ++ Array[Byte](algorithm) ++ Array[Byte](labels) ++ RRData.intToBytes(originalTTL.toInt) ++
     RRData.intToBytes(signatureExpiration.toInt) ++ RRData.intToBytes(signatureInception.toInt) ++ RRData.shortToBytes(keyTag) ++ Name.toByteArray(signerName) ++ signature.head
 

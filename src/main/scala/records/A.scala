@@ -28,6 +28,8 @@ object A {
 
 	def apply(buf: ByteBuf, recordclass: Int, size: Int) = {
 		val record = recordclass match {
+      // Classe misteriosa che ignoriamo per ora?
+      case 0 => 0L
 			// IN
 			case 1 => buf.readUnsignedInt() //return a 32 bit Internet Address
 			// *

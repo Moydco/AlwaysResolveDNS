@@ -53,6 +53,7 @@ object AAAA {
 
   def apply(buf: ByteBuf, recordclass: Int, size: Int) = {
     val record = recordclass match {
+      case 0 => null
       // IN
       case 1 => {
         val marray = new Array[Byte](16) // A 128 bit IPv6 address = network byte order (high-order byte first).

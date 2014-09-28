@@ -26,6 +26,7 @@ object DnsLookupService {
   def hostToRecords(qname: List[String], qtype: Int, qclass: Int, followCnames: Boolean = true): List[(String, AbstractRecord)] = {
     //val domain = DNSCache.getDomain(qtype, qname)
 	  logger.debug("Query type: " + Integer.toString(qtype))
+    logger.debug("Query class: " + Integer.toString(qclass))
     val domain = DNSAuthoritativeSection.getDomain(qtype, qname)
 
 
