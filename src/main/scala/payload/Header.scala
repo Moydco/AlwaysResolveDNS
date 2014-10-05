@@ -13,6 +13,7 @@ case class Header(
 						  val truncated: Boolean,
 						  val recursionDesired: Boolean,
 						  val recursionAvailable: Boolean,
+              val authenticData: Boolean,
 						  val zero: Int,
 						  val rcode: Int,
 						  val questionCount: Int,
@@ -22,7 +23,7 @@ case class Header(
 	def toByteArray = {
 		getBytes(
 			(id << 16) + (boolToInt(response) << 15) + (opcode << 11) + (boolToInt(authoritative) << 10) + (boolToInt(truncated) << 9) +
-				(boolToInt(recursionDesired) << 8) + (boolToInt(recursionAvailable) << 6) + (zero << 4) + rcode) ++
+				(boolToInt(recursionDesired) << 8) + (boolToInt(recursionAvailable) << 7) + (boolToInt(authenticData) << 5) + (zero << 4) + rcode) ++
 			getBytes((questionCount << 16) + answerCount) ++ getBytes((authorityCount << 16) + additionalCount)
 	}
 
@@ -37,22 +38,23 @@ case class Header(
 	def toCompressedByteArray(input: (Array[Byte], Map[String, Int])) = (input._1 ++ toByteArray, input._2)
 
 	def setTruncated(truncated: Boolean) = Header(id, response, opcode, authoritative, truncated, recursionDesired, recursionAvailable,
-		zero, rcode, questionCount, answerCount, authorityCount, additionalCount)
+		authenticData, zero, rcode, questionCount, answerCount, authorityCount, additionalCount)
 }
 
 object Header {
 	val logger = LoggerFactory.getLogger("app")
 
-	lazy val MIN_USHORT = 0;
-	lazy val MAX_USHORT = 0xFFFF;
-	lazy val FLAGS_QR = 15;
-	lazy val FLAGS_OPCODE = 11;
-	lazy val FLAGS_AA = 10;
-	lazy val FLAGS_TC = 9;
-	lazy val FLAGS_RD = 8;
-	lazy val FLAGS_RA = 7;
-	lazy val FLAGS_Z = 4;
-	lazy val FLAGS_RCODE = 0;
+	lazy val MIN_USHORT = 0
+	lazy val MAX_USHORT = 0xFFFF
+	lazy val FLAGS_QR = 15
+	lazy val FLAGS_OPCODE = 11
+	lazy val FLAGS_AA = 10
+	lazy val FLAGS_TC = 9
+	lazy val FLAGS_RD = 8
+	lazy val FLAGS_RA = 7
+  lazy val FLAGS_AD = 5
+	lazy val FLAGS_Z = 4
+	lazy val FLAGS_RCODE = 0
 
 	object OP_CODE extends Enumeration {
 		val QUERY = 0
@@ -77,6 +79,7 @@ object Header {
 			shiftBits(flagsInt, FLAGS_TC, 0x1) != 0, // boolean
 			shiftBits(flagsInt, FLAGS_RD, 0x1) != 0, // booelan
 			shiftBits(flagsInt, FLAGS_RA, 0x1) != 0, // boolean
+      shiftBits(flagsInt, FLAGS_AD, 0x1) != 0, // boolean
 			shiftBits(flagsInt, FLAGS_Z, 0x7), // always zero
 			shiftBits(flagsInt, FLAGS_RCODE, 0xF), // int
 			buf.readUnsignedShort, // qdcount

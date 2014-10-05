@@ -6,178 +6,180 @@ import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 
 case class RRData(
-                   name: List[Array[Byte]],
-                   rtype: Int,
-                   rclass: Int,
-                   ttl: Long,
-                   rdlength: Int,
-                   rdata: AbstractRecord
-                   ) {
-  def toByteArray = {
-    Name.toByteArray(name) ++ RRData.shortToBytes(rtype.toShort) ++
-      RRData.shortToBytes(rclass.toShort) ++ RRData.intToBytes(ttl.toInt) ++ RRData.shortToBytes(rdlength.toShort) ++ rdata.toByteArray
-  }
+                    name: List[Array[Byte]],
+                    rtype: Int,
+                    rclass: Int,
+                    ttl: Long,
+                    rdlength: Int,
+                    rdata: AbstractRecord
+                    ) {
+   def toByteArray = {
+      Name.toByteArray(name) ++ RRData.shortToBytes(rtype.toShort) ++
+         RRData.shortToBytes(rclass.toShort) ++ RRData.intToBytes(ttl.toInt) ++ RRData.shortToBytes(rdlength.toShort) ++ rdata.toByteArray
+   }
 
-  def toCompressedByteArray(input: (Array[Byte], Map[String, Int])) = {
-    val nameBytes = Name.toCompressedByteArray(name, input)
-    val rrHeaderBytes = nameBytes._1 ++ RRData.shortToBytes(rtype.toShort) ++ RRData.shortToBytes(rclass.toShort) ++
-      RRData.intToBytes(ttl.toInt)
-    val compressedRData = rdata.toCompressedByteArray((rrHeaderBytes ++ RRData.shortToBytes(0.toShort), nameBytes._2))
-    val newRDLength = compressedRData._1.length - rrHeaderBytes.length - 2
-    (rrHeaderBytes ++ RRData.shortToBytes(newRDLength.toShort) ++ compressedRData._1.takeRight(newRDLength), compressedRData._2)
-  }
+   def toCompressedByteArray(input: (Array[Byte], Map[String, Int])) = {
+      val nameBytes = Name.toCompressedByteArray(name, input)
+      val rrHeaderBytes = nameBytes._1 ++ RRData.shortToBytes(rtype.toShort) ++ RRData.shortToBytes(rclass.toShort) ++
+         RRData.intToBytes(ttl.toInt)
+      val compressedRData = rdata.toCompressedByteArray((rrHeaderBytes ++ RRData.shortToBytes(0.toShort), nameBytes._2))
+      val newRDLength = compressedRData._1.length - rrHeaderBytes.length - 2
+      (rrHeaderBytes ++ RRData.shortToBytes(newRDLength.toShort) ++ compressedRData._1.takeRight(newRDLength), compressedRData._2)
+   }
 
-  override def toString =
-    name.map(new String(_, "UTF-8")).mkString(".") + "," +
-      rtype + "," + rclass + "," + ttl + "," + rdlength + "," + rdata.toString
+   override def toString =
+      name.map(new String(_, "UTF-8")).mkString(".") + "," +
+         rtype + "," + rclass + "," + ttl + "," + rdlength + "," + rdata.toString
 
 }
 
 object RRData {
 
-  val logger = LoggerFactory.getLogger("app")
+   val logger = LoggerFactory.getLogger("app")
 
-  def apply(buf: ByteBuf, offset: Int = 0) = {
-    val name = Name.parse(buf, offset)
-    val rtype = buf.readUnsignedShort
-    val rclass = buf.readUnsignedShort
-    val ttl = buf.readUnsignedInt()
-    val rdlength = buf.readUnsignedShort
-    val rdata = deserializeRecord(buf, rtype, rclass, rdlength, offset)
-    new RRData(name, rtype, rclass, ttl, rdlength, rdata)
-  }
+   def apply(buf: ByteBuf, offset: Int = 0) = {
+      val name = Name.parse(buf, offset)
+      val rtype = buf.readUnsignedShort
+      val rclass = buf.readUnsignedShort
+      val ttl = buf.readUnsignedInt()
+      val rdlength = buf.readUnsignedShort
+      val rdata = deserializeRecord(buf, rtype, rclass, rdlength, offset)
+      new RRData(name, rtype, rclass, ttl, rdlength, rdata)
+   }
 
-  private def deserializeRecord(buf: ByteBuf, recordtype: Int, recordclass: Int, size: Int, offset: Int) =
-    recordtype match {
-      // A 
-      case 1 => A(buf, recordclass, size)
-      // NS
-      case 2 => NS(buf, recordclass, size, offset)
-      // MD
-      case 3 => AAAA(buf, recordclass, size) // NYI
-      // MF
-      case 4 => null // NYI
-      // CNAME
-      case 5 => CNAME(buf, recordclass, size, offset)
-      // SOA
-      case 6 => SOA(buf, recordclass, size, offset)
-      // MB
-      case 7 => null
-      // MG
-      case 8 => null
-      // MR  
-      case 9 => null
-      // NULL
-      case 10 => NULL(buf, recordclass, size)
-      // WKS
-      case 11 => null
-      // PTR
-      case 12 => PTR(buf, recordclass, size, offset)
-      //HINFO
-      case 13 => null
-      // MINFO
-      case 14 => null
-      // MX
-      case 15 => MX(buf, recordclass, size, offset)
-      // TXT
-      case 16 => TXT(buf, recordclass, size)
+   private def deserializeRecord(buf: ByteBuf, recordtype: Int, recordclass: Int, size: Int, offset: Int) =
+      recordtype match {
+         // A
+         case 1 => A(buf, recordclass, size)
+         // NS
+         case 2 => NS(buf, recordclass, size, offset)
+         // MD
+         case 3 => AAAA(buf, recordclass, size) // NYI
+         // MF
+         case 4 => null // NYI
+         // CNAME
+         case 5 => CNAME(buf, recordclass, size, offset)
+         // SOA
+         case 6 => SOA(buf, recordclass, size, offset)
+         // MB
+         case 7 => null
+         // MG
+         case 8 => null
+         // MR
+         case 9 => null
+         // NULL
+         case 10 => NULL(buf, recordclass, size)
+         // WKS
+         case 11 => null
+         // PTR
+         case 12 => PTR(buf, recordclass, size, offset)
+         //HINFO
+         case 13 => null
+         // MINFO
+         case 14 => null
+         // MX
+         case 15 => MX(buf, recordclass, size, offset)
+         // TXT
+         case 16 => TXT(buf, recordclass, size)
 
-      case 28 => AAAA(buf, recordclass, size)
-      // SRV
-      case 33 => SRV(buf, recordclass, size)
-      // DNSKEY
-      case 46 => RRSIG(buf, recordclass, size)
-      // DNSKEY
-      case 48 => DNSKEY(buf, recordclass, size)
-      // AXFR
-      case 252 => null
-      // *
-      case 255 => null
-      // Unknown
-      case _ => {
-        logger.debug("Unknown RR type of " + recordtype + " received")
-        null
+         case 28 => AAAA(buf, recordclass, size)
+         // SRV
+         case 33 => SRV(buf, recordclass, size)
+         // OPT
+         case 41 => OPT(buf, recordclass, size)
+         // DNSKEY
+         case 46 => RRSIG(buf, recordclass, size)
+         // DNSKEY
+         case 48 => DNSKEY(buf, recordclass, size)
+         // AXFR
+         case 252 => null
+         // *
+         case 255 => null
+         // Unknown
+         case _ => {
+            logger.debug("Unknown RR type of " + recordtype + " received")
+            null
+         }
       }
-    }
 
-  def intToBytes(number: Int) = {
-    val buffer = ByteBuffer.allocate(4)
-    buffer.putInt(number)
-    buffer.array
-  }
+   def intToBytes(number: Int) = {
+      val buffer = ByteBuffer.allocate(4)
+      buffer.putInt(number)
+      buffer.array
+   }
 
-  def longToBytes(number: Long) = {
-    val buffer = ByteBuffer.allocate(8)
-    buffer.putLong(number)
-    buffer.array
-  }
+   def longToBytes(number: Long) = {
+      val buffer = ByteBuffer.allocate(8)
+      buffer.putLong(number)
+      buffer.array
+   }
 
-  def shortToBytes(number: Short) = {
-    val buffer = ByteBuffer.allocate(4)
-    buffer.putInt(number)
-    buffer.array.takeRight(2)
-  }
+   def shortToBytes(number: Short) = {
+      val buffer = ByteBuffer.allocate(4)
+      buffer.putInt(number)
+      buffer.array.takeRight(2)
+   }
 
-  // def shortToBytesForSrvRecords(number: Short)= {
-  //   val logger = LoggerFactory.getLogger("app")
-  //   logger.debug(number.toString)
-  //   val buffer = ByteBuffer.allocate(2)
-  //   buffer.putShort(number)
-  //   buffer.flip
-  //   logger.debug(buffer.getShort.toString)
-  //   buffer.array
-  // }
+   // def shortToBytesForSrvRecords(number: Short)= {
+   //   val logger = LoggerFactory.getLogger("app")
+   //   logger.debug(number.toString)
+   //   val buffer = ByteBuffer.allocate(2)
+   //   buffer.putShort(number)
+   //   buffer.flip
+   //   logger.debug(buffer.getShort.toString)
+   //   buffer.array
+   // }
 
 
-  def shortToByte(number: Short) = {
-    val buffer = ByteBuffer.allocate(4)
-    buffer.putInt(number)
-    buffer.array.takeRight(1)
-  }
+   def shortToByte(number: Short) = {
+      val buffer = ByteBuffer.allocate(4)
+      buffer.putInt(number)
+      buffer.array.takeRight(1)
+   }
 
-  //  private def deserializeBasedOnClass(buf: ChannelBuffer, rrecordclass: Int, size: Int) = {
-  //    
-  //    rrecordclass match {
-  //    	case 1 =>
-  //    	  
-  //    	case 2 =>
-  //    	  
-  //    	case 3 =>
-  //    	  
-  //    	case 4 =>
-  //    	  
-  //    	case 255 =>
-  //    }
-  //    
-  //  }
+   //  private def deserializeBasedOnClass(buf: ChannelBuffer, rrecordclass: Int, size: Int) = {
+   //
+   //    rrecordclass match {
+   //    	case 1 =>
+   //
+   //    	case 2 =>
+   //
+   //    	case 3 =>
+   //
+   //    	case 4 =>
+   //
+   //    	case 255 =>
+   //    }
+   //
+   //  }
 
-  // NAME            a domain name to which this resource record pertains.
-  //var name = ""
+   // NAME            a domain name to which this resource record pertains.
+   //var name = ""
 
-  // TYPE         two octets containing one of the RR type codes.  This
-  //              field specifies the meaning of the datastructures in the RDATA
-  //              field.  
-  //var rtype= ""
+   // TYPE         two octets containing one of the RR type codes.  This
+   //              field specifies the meaning of the datastructures in the RDATA
+   //              field.
+   //var rtype= ""
 
-  // CLASS        two octets which specify the class of the datastructures in the
-  //              RDATA field.
-  //var rclass = ""
+   // CLASS        two octets which specify the class of the datastructures in the
+   //              RDATA field.
+   //var rclass = ""
 
-  // TTL          a 32 bit unsigned integer that specifies the time
-  //              interval (in seconds) that the resource record may be
-  //              cached before it should be discarded.  Zero values are
-  //              interpreted to mean that the RR can only be used for the
-  //              transaction in progress, and should not be cached.
-  //var ttl = 0
+   // TTL          a 32 bit unsigned integer that specifies the time
+   //              interval (in seconds) that the resource record may be
+   //              cached before it should be discarded.  Zero values are
+   //              interpreted to mean that the RR can only be used for the
+   //              transaction in progress, and should not be cached.
+   //var ttl = 0
 
-  // RDLENGTH     an unsigned 16 bit integer that specifies the length in
-  //              octets of the RDATA field.
-  //var rdlenght = 0
+   // RDLENGTH     an unsigned 16 bit integer that specifies the length in
+   //              octets of the RDATA field.
+   //var rdlenght = 0
 
-  // RDATA        a variable length string of octets that describes the
-  //              resource.  The format of this information varies
-  //              according to the TYPE and CLASS of the resource record.
-  //              For example, the if the TYPE is A and the CLASS is IN,
-  //              the RDATA field is a 4 octet ARPA Internet address.
-  //var rdata = ""
+   // RDATA        a variable length string of octets that describes the
+   //              resource.  The format of this information varies
+   //              according to the TYPE and CLASS of the resource record.
+   //              For example, the if the TYPE is A and the CLASS is IN,
+   //              the RDATA field is a 4 octet ARPA Internet address.
+   //var rdata = ""
 }
