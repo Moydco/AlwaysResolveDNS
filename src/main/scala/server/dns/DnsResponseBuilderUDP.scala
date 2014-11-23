@@ -62,11 +62,16 @@ object DnsResponseBuilderUDP {
         // @TODO: Return NS when host not found
         
         val authority =
-          if (!records.isEmpty || query.qtype == RecordType.AXFR.id) List[(String, AbstractRecord)]()
+          if (!records.isEmpty || query.qtype == RecordType.AXFR.id) {
+            logger.debug("Inutile cercare NS")
+            List[(String, AbstractRecord)]()
+          }
           else {
             val records = DnsLookupService.hostToRecords(qname, RecordType.NS.id, query.qclass)
-            if(!records.isEmpty) records
-            else {
+            if (!records.isEmpty) {
+              logger.debug("Nameserver trovati: " + records.length)
+              records
+            } else {
               val ancestors = DnsLookupService.ancestorToRecords(domain, qname, RecordType.NS.id, query.qclass, false).filterNot(_._1 == domain.fullName)
               logger.debug(ancestors.toString)
               ancestors
@@ -126,6 +131,7 @@ object DnsResponseBuilderUDP {
       }
     } catch {
       case ex: DomainNotFoundException => {
+        logger.error(ex.getClass.getName + "\n" + ex.getStackTraceString)
         val header = Header(message.header.id, true, message.header.opcode, false, message.header.truncated,
           message.header.recursionDesired, false, false, 0, ResponseCode.REFUSED.id, message.header.questionCount, 0, 0, 0)
         Array(Message(header, message.query, message.answers, message.authority, message.additional))

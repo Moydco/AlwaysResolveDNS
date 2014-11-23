@@ -54,8 +54,10 @@ object DnsResponseBuilder {
                if (!records.isEmpty || query.qtype == RecordType.AXFR.id) List[(String, AbstractRecord)]()
                else {
                   val records = DnsLookupService.hostToRecords(qname, RecordType.NS.id, query.qclass)
-                  if (!records.isEmpty) records
-                  else {
+                  if (!records.isEmpty) {
+                     logger.debug("Nameserver trovati: " + records.length)
+                     records
+                  } else {
                      val ancestors = DnsLookupService.ancestorToRecords(domain, qname, RecordType.NS.id, query.qclass, false).filterNot(_._1 == domain.fullName)
                      logger.debug(ancestors.toString)
                      ancestors
@@ -68,11 +70,19 @@ object DnsResponseBuilder {
             // TODO Ottimizzare, si può guadagnare tempo costruendo una lista mutabile
             if(message.additional.exists(add => add.rtype == RecordType.OPT.id && isOkBitSet(add))) {
                logger.debug("DNSSEC not implemented yet")
-               val rdata = DnsLookupService.hostToRecords(qname, RecordType.RRSIG.id, query.qclass)
-               if (!rdata.isEmpty) {
-                  records = records ++ rdata
-               } else {
-                  records = records ++ DnsLookupService.ancestorToRecords(domain, qname, RecordType.RRSIG.id, query.qclass, true)
+               try {
+                  val rdata = DnsLookupService.hostToRecords(qname, RecordType.RRSIG.id, query.qclass)
+                  if (!rdata.isEmpty) {
+                     records = records ++ rdata
+                  } else {
+                     records = records ++ DnsLookupService.ancestorToRecords(domain, qname, RecordType.RRSIG.id, query.qclass, true)
+                  }
+               }
+               catch {
+                  case ex: DomainNotFoundException => {
+                     logger.debug("Record RRSIG non trovato")
+                     List[(String, AbstractRecord)]()
+                  }
                }
             }
 
