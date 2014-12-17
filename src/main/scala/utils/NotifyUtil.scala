@@ -1,15 +1,8 @@
-package utils
-
-import enums.RecordType
-import configs.ConfigService
-//import client.DNSClient
-import models.ExtendedDomain
-import scala.collection.JavaConversions._
-import org.slf4j.LoggerFactory
-
 /**
- * *****************************************************************************
- * Copyright 2013 silenteh
+ * Copyright 2013-2015, AlwaysResolve Project (alwaysresolve.org), MOYD.CO LTD
+ * This file incorporates work covered by the following copyright and permission notice:
+ *
+ * Copyright 2012 silenteh
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +15,16 @@ import org.slf4j.LoggerFactory
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * ****************************************************************************
  */
+
+package utils
+
+import enums.RecordType
+import configs.ConfigService
+//import client.DNSClient
+import models.ExtendedDomain
+import scala.collection.JavaConversions._
+import org.slf4j.LoggerFactory
  
  object NotifyUtil {
 
