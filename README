@@ -1,13 +1,1 @@
-Per la compilazione:
---------------------
-
-Lanciare "sbt"
-Dalla console di sbt lanciare "one-jar"
-Il pacchetto viene compilato nella sottodirectory project/scala-2.10
-Copiare in project/scala-2.10 la directory public e il file settings.json
-
-
-Per l'avvio:
-------------
-Spostarsi in project/scala-2.10
-Lanciare java -jar scala-dns_2.10-1.0-one-jar.jar
+For all information, please take a look at [project wiki](https://github.com/Moydco/AlwaysResolveDNS/wiki)
