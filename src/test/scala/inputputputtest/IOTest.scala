@@ -1,3 +1,22 @@
+/**
+ * Copyright 2013-2015, AlwaysResolve Project (alwaysresolve.org), MOYD.CO LTD
+ * This file incorporates work covered by the following copyright and permission notice:
+ *
+ * Copyright 2012 silenteh
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package inputputputtest
 
 import scala.collection.Traversable
@@ -84,23 +103,23 @@ class IOTest extends FunSpec with BeforeAndAfter with ShouldMatchers {
 	  )*/
 	}
 	
-	it("should write a json file from an ExtendedDomain object") {
-	  val soa = Array(new SoaHost("in", "1", "@", "ns1.testexample.com", "ns2.testexample.com", "123456789", "1", "1", "1", "1"))
-	  val nsHosts = Array(new NSHost("in", "@", Array(new WeightedNS(10, "ns1.testexample.com"))), new NSHost("in", "@", Array(new WeightedNS(5, "ns2.testexample.com"))))
-	  val addressHosts = Array(new AddressHost("in", "host1.testexample.com", Array(new WeightedIP(1, "10.0.0.1"))), new AddressHost("in", "host2.testexample.com", Array(new WeightedIP(1, "10.0.0.2"), new WeightedIP(1, "10.0.0.3"))))
-	  val domain = new ExtendedDomain("testexample.com.", 500, nsHosts, soa, null, addressHosts, null, null, null, null, null)
-	  
-	  pathFile.listFiles.find(file => file.getName == domain.fullName + "json") should be(None)
-	  
-	  val clearPath = path.substring(0, path.length - 1)
-	  
-	  JsonIO.storeData(domain, domain.getFilename, clearPath)
-	  
-	  val domainFile = pathFile.listFiles.find(file => file.getName == domain.fullName + "json")
-	  domainFile should not be(None)
-	  domainFile.get.exists should be(true)
-	  domainFile.get.delete
-	}
+//	it("should write a json file from an ExtendedDomain object") {
+//	  val soa = Array(new SoaHost("in", "1", "@", "ns1.testexample.com", "ns2.testexample.com", "123456789", "1", "1", "1", "1"))
+//	  val nsHosts = Array(new NSHost("in", "@", Array(new WeightedNS(10, "ns1.testexample.com"))), new NSHost("in", "@", Array(new WeightedNS(5, "ns2.testexample.com"))))
+//	  val addressHosts = Array(new AddressHost("in", "host1.testexample.com", Array(new WeightedIP(1, "10.0.0.1"))), new AddressHost("in", "host2.testexample.com", Array(new WeightedIP(1, "10.0.0.2"), new WeightedIP(1, "10.0.0.3"))))
+//	  val domain = new ExtendedDomain("testexample.com.", 500, nsHosts, soa, null, addressHosts, null, null, null, null, null)
+//
+//	  pathFile.listFiles.find(file => file.getName == domain.fullName + "json") should be(None)
+//
+//	  val clearPath = path.substring(0, path.length - 1)
+//
+//	  JsonIO.storeData(domain, domain.getFilename, clearPath)
+//
+//	  val domainFile = pathFile.listFiles.find(file => file.getName == domain.fullName + "json")
+//	  domainFile should not be(None)
+//	  domainFile.get.exists should be(true)
+//	  domainFile.get.delete
+//	}
   }
 
   pathFile.deleteOnExit

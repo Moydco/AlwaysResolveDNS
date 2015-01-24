@@ -8,7 +8,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ case class Header(
 						  val truncated: Boolean,
 						  val recursionDesired: Boolean,
 						  val recursionAvailable: Boolean,
+              val authenticData: Boolean,
 						  val zero: Int,
 						  val rcode: Int,
 						  val questionCount: Int,
@@ -41,7 +42,7 @@ case class Header(
 	def toByteArray = {
 		getBytes(
 			(id << 16) + (boolToInt(response) << 15) + (opcode << 11) + (boolToInt(authoritative) << 10) + (boolToInt(truncated) << 9) +
-				(boolToInt(recursionDesired) << 8) + (boolToInt(recursionAvailable) << 6) + (zero << 4) + rcode) ++
+				(boolToInt(recursionDesired) << 8) + (boolToInt(recursionAvailable) << 7) + (boolToInt(authenticData) << 5) + (zero << 4) + rcode) ++
 			getBytes((questionCount << 16) + answerCount) ++ getBytes((authorityCount << 16) + additionalCount)
 	}
 

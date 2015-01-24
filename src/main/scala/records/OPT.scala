@@ -1,8 +1,5 @@
 /**
  * Copyright 2013-2015, AlwaysResolve Project (alwaysresolve.org), MOYD.CO LTD
- * This file incorporates work covered by the following copyright and permission notice:
- *
- * Copyright 2012 silenteh
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +14,29 @@
  * limitations under the License.
  */
 
-package zones
+package records
 
-import enums.RecordType
+import io.netty.buffer.ByteBuf
+import org.slf4j.LoggerFactory
 
-case class Record(domainName: String, rtype: Int, ttl: Int, data: String)
+case class OPT(timetolive: Long = 0) extends AbstractRecord {
+
+   val description = "OPT"
+
+   lazy val toByteArray = Array[Byte]()
+
+   def isEqualTo(any: Any) = any match {
+      case _ => false
+   }
+
+   def toCompressedByteArray(input: (Array[Byte], Map[String, Int])) = (input._1 ++ toByteArray, input._2)
+}
+
+object OPT {
+
+   val logger = LoggerFactory.getLogger("app")
+
+   def apply(buf: ByteBuf, recordclass: Int, size: Int) = {
+      new OPT()
+   }
+}

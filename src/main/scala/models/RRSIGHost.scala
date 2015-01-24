@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,7 +53,7 @@ case class RRSIGHost(
     new RRSIGHost(cls, HostnameUtils.absoluteHostName(name, domain.fullName), timeToLive, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, signerName, signature)
 
   protected def getRData = {
-    new RRSIG( timeToLive, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, (signerName.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, (Array(signature.getBytes())).toList )
+    new RRSIG( timeToLive, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, (signerName.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, signature.getBytes() )
   }
 
 }
