@@ -31,7 +31,7 @@ case class RRSIG(
                   signatureInception: Long,
                   keyTag: Short,
                   signerName: List[Array[Byte]],
-                  signature: List[Array[Byte]]
+                  signature: Array[Byte]
                    ) extends AbstractRecord {
 
   val description = "RRSIG"
@@ -43,18 +43,9 @@ case class RRSIG(
     case _ => false
   }
 
-  /**
-   * Attenzione al parametro signerName: deve essere messo come label dns http://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-10
-   * @return
-   */
   def toByteArray = RRData.shortToBytes(typeCovered) ++ Array[Byte](algorithm) ++ Array[Byte](labels) ++ RRData.intToBytes(originalTTL.toInt) ++
-    RRData.intToBytes(signatureExpiration.toInt) ++ RRData.intToBytes(signatureInception.toInt) ++ RRData.shortToBytes(keyTag) ++ Name.toByteArray(signerName) ++ signature.head
+    RRData.intToBytes(signatureExpiration.toInt) ++ RRData.intToBytes(signatureInception.toInt) ++ RRData.shortToBytes(keyTag) ++ Name.toByteArray(signerName) ++ signature
 
-  /**
-   * Non comprime niente in realtà, però bisogna che ci sia.
-   * @param input
-   * @return
-   */
   def toCompressedByteArray(input: (Array[Byte], Map[String, Int])) = {
     (input._1 ++ toByteArray, input._2)
   }
@@ -75,7 +66,7 @@ object RRSIG {
     val signatureInception = buf.readUnsignedInt()
     val keyTag = buf.readUnsignedShort.toShort
     val signerName = List(Array[Byte]())
-    val signature = List(Array[Byte]())
+    val signature = Array[Byte]()
 
     new RRSIG(60, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, signerName, signature)
   }

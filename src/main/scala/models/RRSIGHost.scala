@@ -53,7 +53,7 @@ case class RRSIGHost(
     new RRSIGHost(cls, HostnameUtils.absoluteHostName(name, domain.fullName), timeToLive, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, signerName, signature)
 
   protected def getRData = {
-    new RRSIG( timeToLive, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, (signerName.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, (Array(signature.getBytes())).toList )
+    new RRSIG( timeToLive, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, (signerName.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, signature.getBytes() )
   }
 
 }
