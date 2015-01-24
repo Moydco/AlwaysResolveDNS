@@ -17,6 +17,7 @@
 package models
 
 import com.fasterxml.jackson.annotation.{JsonIgnoreProperties, JsonProperty}
+import enums.RecordType
 import org.slf4j.LoggerFactory
 import records.RRSIG
 import utils.HostnameUtils
@@ -26,7 +27,7 @@ case class RRSIGHost(
                       @JsonProperty("class") cls: String = null,
                       @JsonProperty("name") name: String = null,
                       @JsonProperty("ttl") timeToLive: Long,
-                      @JsonProperty("typeCovered") typeCovered: Short,
+                      @JsonProperty("typeCovered") typeCovered: String,
                       @JsonProperty("algorithm") algorithm: Byte,
                       @JsonProperty("labels") labels: Byte,
                       @JsonProperty("originalTTL") originalTTL: Long,
@@ -53,7 +54,7 @@ case class RRSIGHost(
     new RRSIGHost(cls, HostnameUtils.absoluteHostName(name, domain.fullName), timeToLive, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, signerName, signature)
 
   protected def getRData = {
-    new RRSIG( timeToLive, typeCovered, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, (signerName.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, signature.getBytes() )
+    new RRSIG( timeToLive, RecordType.withName(typeCovered).id.toShort, algorithm, labels, originalTTL, signatureExpiration, signatureInception, keyTag, (signerName.split("""\.""").map(_.getBytes) :+ Array[Byte]()).toList, signature.getBytes() )
   }
 
 }
