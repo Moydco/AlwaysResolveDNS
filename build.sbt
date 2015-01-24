@@ -35,3 +35,5 @@ libraryDependencies += "com.rabbitmq" % "amqp-client" % "3.3.5"
 seq(com.github.retronym.SbtOneJar.oneJarSettings: _*)
 
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.3.2"
+
+libraryDependencies += "commons-codec" % "commons-codec" % "1.10"

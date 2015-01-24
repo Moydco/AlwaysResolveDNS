@@ -1,6 +1,6 @@
 {"origin":"example.com.","ttl":86400,
 "RRSIG":[{"class":"in","name":"www","ttl":86400,"typeCovered":1,"algorithm":5,"labels":3,"originalTTL":86400,"signatureExpiration":20030322173103,"signatureInception":20030322173103,"keyTag":2642,"signerName":"example.com.","signature":"nonfiniscepiu"}],
-"DNSKEY":[{"class":"in","name":"example.com.","ttl":60,"flags":247,"protocol":3,"algorithm":5,"publicKey":"pippo"}],
+"DNSKEY":[{"class":"in","name":"example.com.","ttl":60,"flags":247,"protocol":3,"algorithm":5,"publicKey":"AwEAAe3fSrbLBy3LOS7pnxEUhvPZTE2H5dIGsI/UfruI/nOEvWWa/PSX 2BFedBkEqOlYdjdNF2f+6lmfk2Od/xu0v5bVqxFE+/24v3hZSlWBxvXz PTAGHrbW/IJYEPqlzVOAS4XdUgHg0N7IbLywNHMvB+Yf+Nm6ctyXXFLV 4WTNnzs7"}],
 "NS":[{"class":"in","name":"example.com.","value":[{"weight":1,"ns":"ns1.example.com"},{"weight":1,"ns":"ns.example.com"}]}],
 "SOA":[{"class":"in","name":"example.com.","mname":"ns.example.com","rname":"jimmy.example.com","at":"1M","serial":"20139918","refresh":"1M","retry":"1M","expire":"1M","minimum":"1M"}],
 "CNAME":[{"class":"in","name":"cname","ttl":60,"value":[{"weight":1,"cname":"www."}]}],

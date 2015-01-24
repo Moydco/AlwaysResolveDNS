@@ -47,7 +47,7 @@ case class DNSKEYHost(
 		new DNSKEYHost(cls, HostnameUtils.absoluteHostName(name, domain.fullName), timeToLive, flags, protocol, algorithm, publicKey)
 
 	protected def getRData = {
-		new DNSKEY(flags, protocol, algorithm, (Array(publicKey.getBytes())).toList, timeToLive)
+		new DNSKEY(flags, protocol, algorithm, publicKey.getBytes(), timeToLive)
 	}
 
 }
