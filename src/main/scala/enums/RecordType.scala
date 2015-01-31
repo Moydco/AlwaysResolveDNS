@@ -32,6 +32,7 @@ object RecordType extends Enumeration {
   val SRV = Value(33)
   val OPT = Value(41)
   val RRSIG = Value(46)
+  val NSEC = Value(47)
   val DNSKEY = Value(48)
 
   val AXFR = Value(252)

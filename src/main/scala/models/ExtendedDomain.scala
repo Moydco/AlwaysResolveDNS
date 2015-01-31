@@ -40,7 +40,8 @@ case class ExtendedDomain(
                            @JsonProperty("MX") mailx: Array[MXHost] = null,
                            @JsonProperty("OH") otherhosts: Array[GenericHost] = null,
                            @JsonProperty("DNSKEY") dnsKey: Array[DNSKEYHost] = null,
-                           @JsonProperty("RRSIG") rrsig: Array[RRSIGHost] = null
+                           @JsonProperty("RRSIG") rrsig: Array[RRSIGHost] = null,
+                           @JsonProperty("NSEC") nsec: Array[NSECHost] = null
                            ) extends AbstractDomain {
   val logger = LoggerFactory.getLogger("app")
 
@@ -48,7 +49,7 @@ case class ExtendedDomain(
   lazy val hosts: List[Host] =
     hostsToList(nameservers) ++ hostsToList(cname) ++ hostsToList(address) ++ hostsToList(ipv6address) ++
       hostsToList(settings) ++ hostsToList(pointer) ++ hostsToList(text) ++ hostsToList(service) ++ hostsToList(mailx) ++
-      hostsToList(otherhosts) ++ hostsToList(dnsKey) ++ hostsToList(rrsig)
+      hostsToList(otherhosts) ++ hostsToList(dnsKey) ++ hostsToList(rrsig) ++ hostsToList(nsec)
 
   @JsonIgnore
   def hasRootEntry(typ: Int = 0) =
@@ -82,6 +83,7 @@ case class ExtendedDomain(
       }
       case "DNSKEY" => findInArrayWithNull(dnsKey, compareHostName(name))
       case "RRSIG" => findInArrayWithNull(rrsig, compareHostName(name))
+      case "NSEC" => findInArrayWithNull(nsec, compareHostName(name))
       case _ => None
     }
   }
@@ -123,36 +125,45 @@ case class ExtendedDomain(
     }
   }
 
+  /**
+   * TODO Remove in the future, it seems to never be called (no validation is executed)
+   */
   def addHost(host: Host) = {
     def add[T <: Host](array: Array[T], host: T) = if (array == null) List(host) else host :: array.toList
+    logger.debug("ADDED HOST: " + host.name)
     host match {
       case h: NSHost =>
-        new ExtendedDomain(fullName, ttl, add(nameservers, h).toArray, settings, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, add(nameservers, h).toArray, settings, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig, nsec)
       case h: SoaHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, add(settings, h).toArray, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, add(settings, h).toArray, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig, nsec)
       case h: CnameHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, add(cname, h).toArray, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, add(cname, h).toArray, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig, nsec)
       case h: AddressHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, add(address, h).toArray, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, add(address, h).toArray, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig, nsec)
       case h: IPv6AddressHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, add(ipv6address, h).toArray, pointer, text, service, mailx, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, add(ipv6address, h).toArray, pointer, text, service, mailx, otherhosts, dnsKey, rrsig, nsec)
       case h: PointerHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, add(pointer, h).toArray, text, service, mailx, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, add(pointer, h).toArray, text, service, mailx, otherhosts, dnsKey, rrsig, nsec)
       case h: TxtHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, add(text, h).toArray, service, mailx, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, add(text, h).toArray, service, mailx, otherhosts, dnsKey, rrsig, nsec)
       case h: SrvHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, add(service, h).toArray, mailx, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, add(service, h).toArray, mailx, otherhosts, dnsKey, rrsig, nsec)
       case h: MXHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, add(mailx, h).toArray, otherhosts, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, add(mailx, h).toArray, otherhosts, dnsKey, rrsig, nsec)
       case h: GenericHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, mailx, add(otherhosts, h).toArray, dnsKey, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, mailx, add(otherhosts, h).toArray, dnsKey, rrsig, nsec)
       case h: DNSKEYHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, add(dnsKey, h).toArray, rrsig)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, add(dnsKey, h).toArray, rrsig, nsec)
       case h: RRSIGHost =>
-        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, add(rrsig, h).toArray)
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, add(rrsig, h).toArray, nsec)
+      case h: NSECHost =>
+        new ExtendedDomain(fullName, ttl, nameservers, settings, cname, address, ipv6address, pointer, text, service, mailx, otherhosts, dnsKey, rrsig, add(nsec, h).toArray)
     }
   }
 
+  /**
+   * TODO Remove in the future, it seems to never be called (no validation is executed)
+   */
   def removeHost(host: Host) = {
     def remove[T <: Host](array: Array[T], host: T) = if (array == null) array else array.filterNot(_.equals(host))
     host match {

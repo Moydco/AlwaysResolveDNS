@@ -106,8 +106,10 @@ object RRData {
          case 33 => SRV(buf, recordclass, size)
          // OPT
          case 41 => OPT(buf, recordclass, size)
-         // DNSKEY
+         // RRSIG
          case 46 => RRSIG(buf, recordclass, size)
+         // NSEC
+         case 47 => NSEC(buf, recordclass, size)
          // DNSKEY
          case 48 => DNSKEY(buf, recordclass, size)
          // AXFR
